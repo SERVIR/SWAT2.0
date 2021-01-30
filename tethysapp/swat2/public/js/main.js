@@ -16,7 +16,7 @@ var LIBRARY_OBJECT = (function() {
      *                      MODULE LEVEL / GLOBAL VARIABLES
      *************************************************************************/
     var public_interface,
-        geoserver_url = 'http://216.218.226.154/geoserver/wms/',
+        geoserver_url = 'https://216.218.226.154/geoserver/wms/',
         gs_workspace = 'swat',
         basin_layer,
         streams_layer,
