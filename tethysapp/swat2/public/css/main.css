@@ -268,4 +268,5 @@ input[type=submit] {
 }
 #sub_chart_container,#rch_chart_container{
     overflow: inherit;
+    width: fit-content;
 }
