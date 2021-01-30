@@ -266,6 +266,6 @@ input[type=submit] {
     text-decoration: none;
     cursor: pointer;
 }
-#sub_chart_container,#rch_chart_container{{
+#sub_chart_container,#rch_chart_container{
     overflow: inherit;
 }
