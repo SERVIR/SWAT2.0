@@ -5,6 +5,7 @@ from django.core.files import File
 from sqlalchemy.sql import text
 from .app import Swat2
 from .config import *
+from wsgiref.util import FileWrapper
 
 def get_upstream(request):
     """
@@ -31,17 +32,16 @@ def save_json(request):
     Controller to save upstream stream and subbasin json files to user's data cart
     """
     upstream_json = json.loads(request.body)
+    unique_id = upstream_json['uniqueId']
+
+    unique_path = os.path.join(temp_workspace, unique_id)
+    outletID = upstream_json['outletID']
+    feature_type = upstream_json['featureType']
+    with open(unique_path + '/' + feature_type + '_upstream_' + outletID + '.json', 'w') as outfile:
+        json.dump(upstream_json, outfile)
     bbox = upstream_json['bbox']
     srs = 'EPSG:'
     srs += upstream_json['crs']['properties']['name'].split(':')[-1]
-    unique_id = upstream_json['uniqueId']
-    outletID = upstream_json['outletID']
-    feature_type = upstream_json['featureType']
-
-    unique_path = os.path.join(temp_workspace, unique_id)
-    with open(unique_path + '/' + feature_type + '_upstream_' + outletID + '.json', 'w') as outfile:
-        json.dump(upstream_json, outfile)
-
     json_dict = JsonResponse({'id': unique_id, 'bbox': bbox, 'srs': srs})
     return json_dict
 
@@ -131,7 +131,7 @@ def download_files(request):
         f = open(path_to_file, 'r')
         myfile = File(f)
 
-        response = HttpResponse(myfile, content_type='application/zip')
+        response = HttpResponse(FileWrapper(open(path_to_file,'rb')), content_type='application/zip')
         response['Content-Disposition'] = 'attachment; filename=' + uniqueID + '.zip'
         return response
 
@@ -175,7 +175,6 @@ def update_selectors(request):
         cur.execute(vqrch)
         rchvex = cur.fetchall()
         rchvex = rchvex[0][0].split(',')
-        print(rchvex)
         rch_options = []
         for var in rchvex:
             option = (rch_param_names[var], var)
@@ -187,7 +186,6 @@ def update_selectors(request):
             watershed_id)
         cur.execute(dqsub)
         subdex = cur.fetchall()
-        print(subdex)
 
         sub_start = subdex[0][0].strftime("%b %d, %Y")
         selector_dict['sub']['start'] = sub_start
@@ -197,7 +195,6 @@ def update_selectors(request):
         vqsub = """SELECT sub_vars FROM watershed_info WHERE watershed_id={0}""".format(watershed_id)
         cur.execute(vqsub)
         subvex = cur.fetchall()
-        print(subvex)
         subvex = subvex[0][0].split(',')
         sub_options = []
         for var in subvex:
