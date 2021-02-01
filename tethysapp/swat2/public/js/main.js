@@ -1090,6 +1090,7 @@ console.log(wms_url);
 
                 srs = layer_xml.getElementsByTagName('SRS')[0].innerHTML
                 bbox = layerParams.BoundingBox[0].extent
+                console.log(bbox)
                 var new_extent = ol.proj.transformExtent(bbox, srs, 'EPSG:4326');
                 var center = ol.extent.getCenter(new_extent)
                 var view = new ol.View({
@@ -1806,7 +1807,6 @@ console.log(wms_url);
 
 
         $("#download_data").click(function(){
-            console.log('in here');
             $("#download-modal").modal('show');
         })
 
