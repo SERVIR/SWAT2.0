@@ -16,7 +16,7 @@ var LIBRARY_OBJECT = (function() {
      *                      MODULE LEVEL / GLOBAL VARIABLES
      *************************************************************************/
     var public_interface,
-        geoserver_url = 'https://216.218.226.154/geoserver/wms/',
+        geoserver_url = 'https://thredds.servirglobal.net/geoserver/wms/',
         gs_workspace = 'swat',
         basin_layer,
         streams_layer,
@@ -1803,6 +1803,13 @@ console.log(wms_url);
         $("#nasaaccess").click(function(){
             nasaaccess_validate();
         })
+
+
+        $("#download_data").click(function(){
+            console.log('in here');
+            $("#download-modal").modal('show');
+        })
+
 
         $('#na_submit').click(function() {
             $("#cont-modal").modal('hide');

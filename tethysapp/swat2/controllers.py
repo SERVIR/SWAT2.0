@@ -2,11 +2,10 @@ from django.shortcuts import *
 from tethys_sdk.gizmos import *
 from datetime import datetime
 from .app import Swat2
-from .model import *
 import tethysapp.swat2.config as cfg
 from sqlalchemy.sql import text
 import psycopg2
-
+from .forms import accessCodeForm
 def home(request):
     """
     Controller for the Output Viewer page.
@@ -22,7 +21,7 @@ def home(request):
     watersheds = cur.fetchall()
     print(watersheds)
     watershed_id = watersheds[0][0]
-
+    accesscodeform = accessCodeForm()
     watershed_options = []
 
     for f in watersheds:
@@ -127,6 +126,7 @@ def home(request):
         'rch_var_select': rch_var_select,
         'sub_var_select': sub_var_select,
         'watershed_select': watershed_select,
+        'accesscodeform': accesscodeform,
     }
 
     return render(request, 'swat2/home.html', context)

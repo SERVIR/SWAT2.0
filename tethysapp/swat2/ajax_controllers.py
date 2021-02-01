@@ -205,3 +205,35 @@ def update_selectors(request):
     cur.close()
     json_dict = JsonResponse(selector_dict)
     return json_dict
+
+def download_data(request):
+    """
+    Controller to download data using a unique access code emailed to the user when their data is ready
+    """
+    if request.method == 'POST':
+        #get access code from form
+        access_code = request.POST['access_code']
+
+        #identify user's file path on the server
+        unique_path = os.path.join(nasaaccess_path, 'outputs', access_code, 'nasaaccess_data')
+
+        #compress the entire directory into a .zip file
+        def zipfolder(foldername, target_dir):
+            zipobj = zipfile.ZipFile(foldername + '.zip', 'w', zipfile.ZIP_DEFLATED)
+            rootlen = len(target_dir) + 1
+            for base, dirs, files in os.walk(target_dir):
+                for file in files:
+                    fn = os.path.join(base, file)
+                    zipobj.write(fn, fn[rootlen:])
+
+        zipfolder(unique_path, unique_path)
+
+        #open the zip file
+        path_to_file = os.path.join(nasaaccess_path, 'outputs', access_code, 'nasaaccess_data.zip')
+        f = open(path_to_file, 'r')
+        myfile = File(f)
+
+        #download the zip file using the browser's download dialogue box
+        response = HttpResponse(FileWrapper(open(path_to_file,'rb')), content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename=nasaaccess_data.zip'
+        return response

@@ -1,3 +1,4 @@
+from django.db import models
 from tethys_sdk.services import get_spatial_dataset_engine
 from .config import *
 from .outputs_config import *
@@ -18,6 +19,10 @@ import  psycopg2
 
 # PostgreSQL db setup
 Base = declarative_base()
+class accessCode(models.Model):
+    access_code = models.CharField(max_length=6)
+    class Meta:
+        app_label='tethysapp.swat2'
 
 class Watershed(Base):
     '''

@@ -74,6 +74,11 @@ class Swat2(TethysAppBase):
                 url='swat2/download_files',
                 controller='swat2.ajax_controllers.download_files'
             ),
+            UrlMap(
+                name='download',
+                url='swat2/download',
+                controller='swat2.ajax_controllers.download_data'
+           ),
         )
 
         return url_maps
