@@ -14,9 +14,10 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
 from .app import Swat2
 import tethysapp.swat2.config as cfg
+import logging
 
 import  psycopg2
-
+logging.basicConfig(filename='/home/tethys/subprocesses/model.log',level=logging.INFO)
 # PostgreSQL db setup
 Base = declarative_base()
 class accessCode(models.Model):
@@ -317,24 +318,39 @@ def get_upstreams(watershed_id, streamID):
     return upstreams
 
 def clip_raster(watershed, uniqueID, outletID, raster_type):
+    logging.info("clip raster entered")
     input_json = os.path.join(temp_workspace, uniqueID, 'basin_upstream_' + outletID + '.json')
     input_tif = os.path.join(data_path, watershed, 'Land', raster_type + '.tif')
     output_tif = os.path.join(temp_workspace, uniqueID, watershed + '_upstream_'+ raster_type + '_' + outletID + '.tif')
+    logging.info("clip raster before gdal")
     subprocess.call('{0} --config GDALWARP_IGNORE_BAD_CUTLINE YES -cutline {1} -crop_to_cutline -dstalpha {2} {3}'.format(cfg.gdalwarp_path,input_json, input_tif, output_tif),shell=True)
+    logging.info("clip raster after gdal")
 
     storename = watershed + '_upstream_' + raster_type + '_' + outletID
+    logging.info(storename)
+
     headers = {'Content-type': 'image/tiff', }
     user = cfg.geoserver['user']
     password = cfg.geoserver['password']
+    logging.info("before reading tif")
+
     data = open(output_tif, 'rb').read()
+    logging.info("after reading tif")
 
     geoserver_engine = get_spatial_dataset_engine(name='SCO')
+    logging.info("after geoserver engine")
+
     response = geoserver_engine.get_layer(storename, debug=True)
+    logging.info("after reading geoserver layer")
+
     if response['success'] == False:
         request_url = '{0}workspaces/{1}/coveragestores/{2}/file.geotiff'.format(geoserver['rest_url'],
                                                                                  geoserver['workspace'], storename)
+        logging.info("response success")
 
         requests.put(request_url, verify=False, headers=headers, data=data, auth=(user, password))
+        logging.info("put into server")
+
 
 def coverage_stats(watershed, watershed_id, unique_id, outletID, raster_type):
     conn = psycopg2.connect(
