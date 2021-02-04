@@ -6,6 +6,11 @@ from sqlalchemy.sql import text
 from .app import Swat2
 from .config import *
 from wsgiref.util import FileWrapper
+import logging
+LOG_FILENAME = "/home/tethys/subprocesses/ajaxc.log"
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO)
 
 def get_upstream(request):
     """

@@ -7,17 +7,20 @@ from datetime import datetime
 from collections import OrderedDict
 import numpy as np
 import pandas as pd
-import os, subprocess, requests, zipfile, random, string, logging
+import os, subprocess, requests, zipfile, random, string
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, Float, String, ForeignKey, Date
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
 from .app import Swat2
 import tethysapp.swat2.config as cfg
-import logging
 
 import  psycopg2
-logging.basicConfig(filename='/home/tethys/subprocesses/model.log',level=logging.INFO)
+import logging
+LOG_FILENAME = "/home/tethys/subprocesses/model.log"
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
+logging.basicConfig(filename=LOG_FILENAME,level=logging.INFO)
 # PostgreSQL db setup
 Base = declarative_base()
 class accessCode(models.Model):
