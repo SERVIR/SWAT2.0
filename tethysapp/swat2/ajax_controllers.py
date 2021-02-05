@@ -7,6 +7,8 @@ from .app import Swat2
 from .config import *
 from wsgiref.util import FileWrapper
 import logging
+from rest_framework import serializers
+
 LOG_FILENAME = "/home/tethys/subprocesses/ajaxc.log"
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
