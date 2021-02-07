@@ -915,7 +915,7 @@ console.log(wms_url);
 //      Set the wms source to the url, workspace, and store for the lulc layer of the selected watershed
         wms_source = new ol.source.ImageWMS({
             url: geoserver_url,
-            params: {'LAYERS':store_id,'STYLES':style},
+            params: {'LAYERS':store_id,'STYLE':style},
             serverType: 'geoserver',
             crossOrigin: 'Anonymous'
         });
@@ -1146,7 +1146,8 @@ console.log(wms_url);
                 var values = data.Values
                 var dates = data.Dates
                 var parameters = data.Parameters
-                var names = data.Names
+                var ns = data.Names
+                let names = [...new Set(ns)];
                 var reachId = data.ReachID
 
                 var chartContainer
