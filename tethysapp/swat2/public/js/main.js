@@ -837,6 +837,7 @@ console.log(wms_url);
         });
 
 //      add streams to the map
+
         map.addLayer(streams_layer);
 
     };
@@ -971,63 +972,72 @@ console.log(wms_url);
 
 
     toggleLayers = function() {
-        if (($('#lulcOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass( "off" )) && (!$(".stationToggle .toggle").hasClass("off"))) {
-            $('#legend_container > img').remove();
-            add_lulc();
-            add_basins();
-            add_streams();
-            add_stations();
-        } else if (($('#soilOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass( "off" )) && (!$(".stationToggle .toggle").hasClass("off"))) {
-            $('#legend_container > img').remove();
-            add_soil();
-            add_basins();
-            add_streams();
-            add_stations();
-        } else if (($('#noneOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass( "off" )) && (!$(".stationToggle .toggle").hasClass("off"))) {
-            $('#legend_container > img').remove();
-            add_basins();
-            add_streams();
-            add_stations();
-        } else if (($('#lulcOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass( "off" )) && ($(".stationToggle .toggle").hasClass("off"))) {
-            $('#legend_container > img').remove();
-            add_lulc();
-            add_basins();
-            add_streams();
-        } else if (($('#soilOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass( "off" )) && ($(".stationToggle .toggle").hasClass("off"))) {
-            $('#legend_container > img').remove();
-            add_soil();
-            add_basins();
-            add_streams();
-        } else if (($('#noneOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass( "off" )) && ($(".stationToggle .toggle").hasClass("off"))) {
-            $('#legend_container > img').remove();
-            add_basins();
-            add_streams();
-        } else if (($('#lulcOption').is(':checked')) && ($(".basinToggle .toggle").hasClass( "off" )) && (!$(".stationToggle .toggle").hasClass("off"))) {
-            $('#legend_container > img').remove();
-            add_lulc();
-            add_streams();
-            add_stations();
-        } else if (($('#soilOption').is(':checked')) && ($(".basinToggle .toggle").hasClass( "off" )) && (!$(".stationToggle .toggle").hasClass("off"))) {
-            $('#legend_container > img').remove();
-            add_soil();
-            add_streams();
-            add_stations();
-        } else if (($('#noneOption').is(':checked')) && ($(".basinToggle .toggle").hasClass( "off" )) && (!$(".stationToggle .toggle").hasClass("off"))) {
-            $('#legend_container > img').remove();
-            add_streams();
-            add_stations();
-        } else if (($('#lulcOption').is(':checked')) && ($(".basinToggle .toggle").hasClass( "off" )) && ($(".stationToggle .toggle").hasClass("off"))) {
-            $('#legend_container > img').remove();
-            add_lulc();
-            add_streams();
-        } else if (($('#soilOption').is(':checked')) && ($(".basinToggle .toggle").hasClass( "off" )) && ($(".stationToggle .toggle").hasClass("off"))) {
-            $('#legend_container > img').remove();
-            add_soil();
-            add_streams();
-        } else if (($('#noneOption').is(':checked')) && ($(".basinToggle .toggle").hasClass( "off" )) && ($(".stationToggle .toggle").hasClass("off"))) {
-            $('#legend_container > img').remove();
-            add_streams();
-        }
+            if((!$(".watershedToggle .toggle").hasClass( "off" ))) {
+                console.log("watershed")
+
+                add_streams();
+            }
+            else {
+                map.removeLayer(streams_layer);
+            }
+            if (($('#lulcOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass("off")) && (!$(".stationToggle .toggle").hasClass("off"))) {
+                $('#legend_container > img').remove();
+                add_lulc();
+                add_basins();
+                // add_streams();
+                add_stations();
+            } else if (($('#soilOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass("off")) && (!$(".stationToggle .toggle").hasClass("off"))) {
+                $('#legend_container > img').remove();
+                add_soil();
+                add_basins();
+                // add_streams();
+                add_stations();
+            } else if (($('#noneOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass("off")) && (!$(".stationToggle .toggle").hasClass("off"))) {
+                $('#legend_container > img').remove();
+                add_basins();
+                // add_streams();
+                add_stations();
+            } else if (($('#lulcOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass("off")) && ($(".stationToggle .toggle").hasClass("off"))) {
+                $('#legend_container > img').remove();
+                add_lulc();
+                add_basins();
+                // add_streams();
+            } else if (($('#soilOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass("off")) && ($(".stationToggle .toggle").hasClass("off"))) {
+                $('#legend_container > img').remove();
+                add_soil();
+                add_basins();
+                // add_streams();
+            } else if (($('#noneOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass("off")) && ($(".stationToggle .toggle").hasClass("off"))) {
+                $('#legend_container > img').remove();
+                add_basins();
+                // add_streams();
+            } else if (($('#lulcOption').is(':checked')) && ($(".basinToggle .toggle").hasClass("off")) && (!$(".stationToggle .toggle").hasClass("off"))) {
+                $('#legend_container > img').remove();
+                add_lulc();
+                // add_streams();
+                add_stations();
+            } else if (($('#soilOption').is(':checked')) && ($(".basinToggle .toggle").hasClass("off")) && (!$(".stationToggle .toggle").hasClass("off"))) {
+                $('#legend_container > img').remove();
+                add_soil();
+                // add_streams();
+                add_stations();
+            } else if (($('#noneOption').is(':checked')) && ($(".basinToggle .toggle").hasClass("off")) && (!$(".stationToggle .toggle").hasClass("off"))) {
+                $('#legend_container > img').remove();
+                // add_streams();
+                add_stations();
+            } else if (($('#lulcOption').is(':checked')) && ($(".basinToggle .toggle").hasClass("off")) && ($(".stationToggle .toggle").hasClass("off"))) {
+                $('#legend_container > img').remove();
+                add_lulc();
+                // add_streams();
+            } else if (($('#soilOption').is(':checked')) && ($(".basinToggle .toggle").hasClass("off")) && ($(".stationToggle .toggle").hasClass("off"))) {
+                $('#legend_container > img').remove();
+                add_soil();
+                // add_streams();
+            } else if (($('#noneOption').is(':checked')) && ($(".basinToggle .toggle").hasClass("off")) && ($(".stationToggle .toggle").hasClass("off"))) {
+                $('#legend_container > img').remove();
+                // add_streams();
+            }
+
     }
 
 
@@ -1470,6 +1480,8 @@ console.log(wms_url);
                 'userID': userId,
                 },
             success: function(result){
+                var wsheds=watershed_id?"Yes":"No";
+
                 var rch = result.rch.exists
                 sessionStorage.setItem('rch_avail', rch)
                 var sub = result.sub.exists
@@ -1551,6 +1563,11 @@ console.log(wms_url);
                     $('.stationToggle').removeClass('hidden')
                 } else {
                     $('.stationToggle').addClass('hidden')
+                }
+                if (wsheds === 'Yes') {
+                    $('.watershedToggle').removeClass('hidden')
+                } else {
+                    $('.watershedToggle').addClass('hidden')
                 }
 
                 if (lulc === 'Yes') {
@@ -1723,6 +1740,10 @@ console.log(wms_url);
         })
 
         $(".stationToggle").change(function(){
+            clearLayers();
+            toggleLayers();
+        })
+         $(".watershedToggle").change(function(){
             clearLayers();
             toggleLayers();
         })
