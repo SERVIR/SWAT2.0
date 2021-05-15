@@ -66,7 +66,10 @@
     </div>
     <br>
     <br>
-    <div id="legend_container"></div>
+    <div id="legend_container">
+<!--        <button id="imgg" type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal">Show Legend</button>-->
+
+    </div>
 
 
 {% endblock %}
@@ -77,6 +80,26 @@
 
 {# Use the after_app_content block for modals #}
 {% block after_app_content %}
+
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Legend</h4>
+      </div>
+      <div class="modal-body">
+        <img src="/static/swat2/images/lulc.jpg" alt="LULC/SOIL" width="400" height="400">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
   <!--Data Viewer Modal-->
   <div class="modal fade" id="data-modal" tabindex="-1" role="dialog" aria-labelledby="data-modal-label">
     <div class="modal-dialog" id="data-modal role="document">
@@ -110,6 +133,13 @@
                     <div id="rch_query" class="queryItems">
                         <div id="rch_var_picker" class="var_picker">
                             {% gizmo rch_var_select %}
+                        </div>
+
+                         <div class="chartToggle">
+
+                            <label>
+                                <input id="chart_toggle" type="checkbox" checked data-toggle="toggle" data-on="Monthly" data-off="Daily" data-onstyle="success" data-offstyle="danger">
+                            </label>
                         </div>
                         <div id="rch_date_picker" class="date_picker">
                             <div class="input-group input-daterange">
@@ -335,6 +365,7 @@
       </div>
     </div>
   </div>
+<div id="popup"><p>ffff</p></div>
 
 <!-- Contact Information Modal -->
   <div class="modal fade" id="cont-modal" tabindex="-1" role="dialog" aria-labelledby="cont-modal-label">
@@ -415,7 +446,7 @@
                     <li class="welcome-step"><b>Click 'X' in the top-right of the app to return to the Main Apps Library</b></li>
                     <li class = "welcom-step"><b>External Resources and Links:</b>
                         <ul>
-                            <li><a href="https://doi.org/10.3390/rs10060885" target="_blank">About the Lower Mekong SWAT model and nasaaccess functions</a></li>
+                            <li><a href="https://www.sciencedirect.com/science/article/pii/S1364815218312088" target="_blank">About the SWATOnline Visualization tool</a>, <a href="https://www.mdpi.com/2072-4292/10/6/885/" target="_blank">the Lower Mekong SWAT model data</a>  and <a href="https://github.com/nasa/NASAaccess" target="_blank"> NASAaccess tool</a></li>
                             <li><a href="https://servir.adpc.net/" target="_blank">About SERVIR-Mekong</a></li>
                             <li><a href="https://servirglobal.net/Privacy-Terms-of-Use" target="_blank">Privacy and Terms of Conditions</a></li>
                             <li><a href="https://github.com/SERVIR/SWAT2.0/" target="_blank">View Code</a></li>
@@ -428,7 +459,6 @@
                 <div align="center" id="logos">
                     <div class="logo-image"><a href="http://www.usaid.gov/" target="_blank"><img src="https://servirglobal.net/Portals/_default/Skins/Servir2015/img/usaid.png"></a></div>
                     <div class="logo-image"><a href="http://appliedsciences.nasa.gov/" target="_blank"><img src="https://servirglobal.net/Portals/_default/Skins/Servir2015/img/nasa.png"></a></div>
-                    <div class="logo-image"><a href="https://www.nasa.gov/goddard" target="_blank"><img src="https://www.spacefoundation.org/sites/default/files/styles/partner_profile_logo/public/logo/Goddard%20SFC-logo%20image.png?itok=2GI-msND"></a></div>
                     <div class="logo-image"><a href="https://servir.adpc.net/" target="_blank"><img src="https://servir.adpc.net/themes/svmk/images/optimized/Servir_Logo_Color.png"></a></div>
                     <div class="logo-image"><a href="http://www.adpc.net/" target="_blank"><img src="https://servirglobal.net/Portals/_default/Skins/Servir2015/img/adpc.png"></a></div>
                 </div>

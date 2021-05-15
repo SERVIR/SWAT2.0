@@ -1,4 +1,7 @@
 import os, json
+from pathlib import Path
+import shutil
+import os
 from .model import *
 from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from django.core.files import File
@@ -7,7 +10,7 @@ from .app import Swat2
 from .config import *
 from wsgiref.util import FileWrapper
 import logging
-from rest_framework import serializers
+
 
 LOG_FILENAME = "/home/tethys/subprocesses/ajaxc.log"
 for handler in logging.root.handlers[:]:
@@ -21,8 +24,8 @@ def get_upstream(request):
     watershed = request.POST.get('watershed')
     watershed_id = request.POST.get('watershed_id')
     streamID = request.POST.get('streamID')
-    print('************')
-    print(streamID)
+    # print('************')
+    # print(streamID)
     unique_id = request.POST.get('id')
     unique_path = os.path.join(temp_workspace, unique_id)
     if not os.path.exists(unique_path):
@@ -78,8 +81,8 @@ def timeseries(request):
     if file_type == 'rch':
         # Call the correct rch data parser function based on whether the monthly or daily toggle was selected
         if monthOrDay == 'Monthly':
-            print({'Error': 'No monthly data available currently'})
-            # timeseries_dict = extract_monthly_rch(watershed, start, end, parameters, streamID)
+            #print({'Error': 'No monthly data available currently'})
+            timeseries_dict = extract_monthly_rch(watershed,watershed_id, start, end, parameters, streamID)
         else:
             timeseries_dict = extract_daily_rch(watershed, watershed_id, start, end, parameters, streamID)
     elif file_type == 'sub':
@@ -220,9 +223,21 @@ def download_data(request):
     if request.method == 'POST':
         #get access code from form
         access_code = request.POST['access_code']
+        # source_dir=os.path.join(R_temp, access_code)
+        # target_dir=os.path.join(R_path, 'outputs', access_code,'nasaaccess_data')
+        # if os.path.exists(source_dir):
+        #     try:
+        #         file_names = os.listdir(source_dir)
+        #         if not os.path.exists(target_dir):
+        #             os.makedirs(target_dir)
+        #         for file_name in file_names:
+        #             shutil.copy(os.path.join(source_dir, file_name), target_dir)
+        #     except OSError as e:
+        #         print("Error: %s - %s." % (e.filename, e.strerror))
 
         #identify user's file path on the server
-        unique_path = os.path.join(nasaaccess_path, 'outputs', access_code, 'nasaaccess_data')
+        unique_path = os.path.join(R_path, 'outputs', access_code, 'nasaaccess_data')
+
 
         #compress the entire directory into a .zip file
         def zipfolder(foldername, target_dir):
@@ -236,7 +251,7 @@ def download_data(request):
         zipfolder(unique_path, unique_path)
 
         #open the zip file
-        path_to_file = os.path.join(nasaaccess_path, 'outputs', access_code, 'nasaaccess_data.zip')
+        path_to_file = os.path.join(R_path, 'outputs', access_code, 'nasaaccess_data.zip')
         f = open(path_to_file, 'r')
         myfile = File(f)
 

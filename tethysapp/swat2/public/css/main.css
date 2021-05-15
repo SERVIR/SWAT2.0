@@ -77,8 +77,8 @@
 
 .monthDayToggle label {
     margin-bottom: 0px !important;
-    margin-left: 5px
-    margin-right: 5px
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 .monthDayToggle .toggle.btn {
@@ -206,14 +206,11 @@
 }
 
 #legend_container {
-    height: 600px;
+    height: 200px;
     width: 100%;
 }
 
-#legend_container img {
-    max-width:100%;
-    max-height:100%
-}
+
 
 .view-file {
     position: absolute;
@@ -274,3 +271,12 @@ input[type=submit] {
   width: 100% !important;
 }
 
+.chartToggle{
+    display: inline;
+
+    float: left;
+    margin-right: 5px;
+}
+.toggle.btn {
+    min-width: 80px;
+}

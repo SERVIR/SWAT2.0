@@ -40,7 +40,8 @@ var LIBRARY_OBJECT = (function() {
         wms_layer,
         current_layer,
         map,
-        cart
+        cart;
+     var monthOrDay= 'Daily';
 
     /************************************************************************
      *                    PRIVATE FUNCTION DECLARATIONS
@@ -82,7 +83,7 @@ var LIBRARY_OBJECT = (function() {
      *                    PRIVATE FUNCTION IMPLEMENTATIONS
      *************************************************************************/
     //Get a CSRF cookie for request
-    getCookie = function(name) {
+    getCookie = function (name) {
         var cookieValue = null;
         if (document.cookie && document.cookie != '') {
             var cookies = document.cookie.split(';');
@@ -105,9 +106,9 @@ var LIBRARY_OBJECT = (function() {
     }
 
     //add csrf token to appropriate ajax requests
-    $(function() {
+    $(function () {
         $.ajaxSetup({
-            beforeSend: function(xhr, settings) {
+            beforeSend: function (xhr, settings) {
                 if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
                     xhr.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
                 }
@@ -129,21 +130,21 @@ var LIBRARY_OBJECT = (function() {
             dataType: "json",
             data: ajax_data
         });
-        xhr.done(function(data) {
-            if("success" in data) {
+        xhr.done(function (data) {
+            if ("success" in data) {
                 // console.log("success");
             } else {
                 console.log(xhr.responseText);
             }
         })
-        .fail(function(xhr, status, error) {
-            console.log(xhr.responseText);
-        });
+            .fail(function (xhr, status, error) {
+                console.log(xhr.responseText);
+            });
 
         return xhr;
     }
 
-    init_map = function() {
+    init_map = function () {
 //      Initialize all the initial map elements (projection, basemap, layers, center, zoom)
         var projection = ol.proj.get('EPSG:4326');
         var baseLayer = new ol.layer.Tile({
@@ -177,7 +178,7 @@ var LIBRARY_OBJECT = (function() {
 
     };
 
-    init_rch_map = function() {
+    init_rch_map = function () {
 //      Initialize all the initial map elements (projection, basemap, layers, center, zoom)
         var projection = ol.proj.get('EPSG:4326');
         var baseLayer = new ol.layer.Tile({
@@ -216,7 +217,7 @@ var LIBRARY_OBJECT = (function() {
 
     };
 
-    init_sub_map = function() {
+    init_sub_map = function () {
 //      Initialize all the initial map elements (projection, basemap, layers, center, zoom)
         var projection = ol.proj.get('EPSG:4326');
         var baseLayer = new ol.layer.Tile({
@@ -294,7 +295,7 @@ var LIBRARY_OBJECT = (function() {
 //
 //    };
 
-    init_lulc_map = function() {
+    init_lulc_map = function () {
 //      Initialize all the initial map elements (projection, basemap, layers, center, zoom)
         var projection = ol.proj.get('EPSG:4326');
         var baseLayer = new ol.layer.Tile({
@@ -333,7 +334,7 @@ var LIBRARY_OBJECT = (function() {
 
     };
 
-    init_soil_map = function() {
+    init_soil_map = function () {
 //      Initialize all the initial map elements (projection, basemap, layers, center, zoom)
         var projection = ol.proj.get('EPSG:4326');
         var baseLayer = new ol.layer.Tile({
@@ -372,7 +373,7 @@ var LIBRARY_OBJECT = (function() {
 
     };
 
-    init_nasaaccess_map = function() {
+    init_nasaaccess_map = function () {
 //      Initialize all the initial map elements (projection, basemap, layers, center, zoom)
         var projection = ol.proj.get('EPSG:4326');
         var baseLayer = new ol.layer.Tile({
@@ -411,7 +412,7 @@ var LIBRARY_OBJECT = (function() {
 
     };
 
-    init_events = function() {
+    init_events = function () {
         (function () {
             var target, observer, config;
             // select the target node
@@ -433,7 +434,7 @@ var LIBRARY_OBJECT = (function() {
             observer.observe(target, config);
         }());
 
-        map.on("singleclick",function(evt){
+        map.on("singleclick", function (evt) {
 
             if (map.getTargetElement().style.cursor == "pointer") {
 
@@ -453,7 +454,7 @@ var LIBRARY_OBJECT = (function() {
                 var viewResolution = view.getResolution();
 
                 var wms_url = current_layer.getSource().getGetFeatureInfoUrl(evt.coordinate, viewResolution, view.getProjection(), {'INFO_FORMAT': 'application/json'}); //Get the wms url for the clicked point
-console.log(wms_url);
+                console.log(wms_url);
                 if (wms_url) {
 
                     //Retrieving the details for clicked point via the url
@@ -510,21 +511,22 @@ console.log(wms_url);
             }
         });
 
-        map.on('pointermove', function(evt) {
+        map.on('pointermove', function (evt) {
             if (evt.dragging) {
                 return;
             }
             var pixel = map.getEventPixel(evt.originalEvent);
-            var hit = map.forEachLayerAtPixel(pixel, function(layer) {
-                if (layer != layers[0]&& layer != layers[1]){
+            var hit = map.forEachLayerAtPixel(pixel, function (layer) {
+                if (layer != layers[0] && layer != layers[1]) {
                     current_layer = layer;
-                    return true;}
+                    return true;
+                }
             });
             map.getTargetElement().style.cursor = hit ? 'pointer' : '';
         });
     }
 
-    get_upstream = function(reach_store_id, basin_store_id, watershed, watershed_id, streamID, userId) {
+    get_upstream = function (reach_store_id, basin_store_id, watershed, watershed_id, streamID, userId) {
         $.ajax({
             type: "POST",
             url: '/apps/swat2/get_upstream/',
@@ -534,7 +536,7 @@ console.log(wms_url);
                 'streamID': streamID,
                 'id': userId
             },
-            success: function(data) {
+            success: function (data) {
                 var upstreams = data.upstreams
                 var outletID = sessionStorage.streamID
                 sessionStorage.setItem('upstreams', upstreams)
@@ -543,12 +545,12 @@ console.log(wms_url);
                     cql_filter = 'Subbasin=' + streamID.toString();
                 } else {
                     cql_filter = 'Subbasin=' + streamID.toString();
-                    for (var i=1; i<upstreams.length; i++) {
+                    for (var i = 1; i < upstreams.length; i++) {
                         cql_filter += ' OR Subbasin=' + upstreams[i].toString();
                     }
                 }
                 var reach_url = geoserver_url + 'ows?service=wfs&version=2.0.0&request=getfeature&typename=' + reach_store_id + '&CQL_FILTER=Subbasin=' + streamID + '&outputFormat=application/json&srsname=EPSG:4326&,EPSG:4326'
-                var upstream_reach_url = geoserver_url + 'ows?service=wfs&version=2.0.0&request=getfeature&typename=' + reach_store_id + '&CQL_FILTER=' + cql_filter+ '&outputFormat=application/json&srsname=EPSG:4326&,EPSG:4326'
+                var upstream_reach_url = geoserver_url + 'ows?service=wfs&version=2.0.0&request=getfeature&typename=' + reach_store_id + '&CQL_FILTER=' + cql_filter + '&outputFormat=application/json&srsname=EPSG:4326&,EPSG:4326'
                 console.log(upstream_reach_url);
                 var streamVectorSource = new ol.source.Vector({
                     format: new ol.format.GeoJSON(),
@@ -595,9 +597,9 @@ console.log(wms_url);
                 });
 
                 var color = '#ffffff';
-                    color = ol.color.asArray(color);
-                    color = color.slice();
-                    color[3] = 0;
+                color = ol.color.asArray(color);
+                color = color.slice();
+                color[3] = 0;
 
                 upstreamOverlaySubbasin = new ol.layer.Vector({
                     source: upstreamSubbasinVectorSource,
@@ -647,8 +649,8 @@ console.log(wms_url);
         });
     }
 
-    save_json = function(upstream_basin_url, upstream_reach_url, data) {
-        $.getJSON(upstream_reach_url, function(data) {
+    save_json = function (upstream_basin_url, upstream_reach_url, data) {
+        $.getJSON(upstream_reach_url, function (data) {
             var upstreamJson = data;
             upstreamJson['uniqueId'] = sessionStorage.userId
             upstreamJson['featureType'] = 'reach'
@@ -658,7 +660,7 @@ console.log(wms_url);
                 type: 'POST',
                 url: "/apps/swat2/save_json/",
                 data: JSON.stringify(upstreamJson),
-                success: function(result){
+                success: function (result) {
                     var bbox = result.bbox
                     var srs = result.srs
                     var new_extent = ol.proj.transformExtent(bbox, srs, 'EPSG:4326');
@@ -688,7 +690,7 @@ console.log(wms_url);
                 }
             })
         })
-        $.getJSON(upstream_basin_url, function(data) {
+        $.getJSON(upstream_basin_url, function (data) {
             var upstreamJson = data;
             upstreamJson['uniqueId'] = sessionStorage.userId
             upstreamJson['featureType'] = 'basin'
@@ -698,7 +700,7 @@ console.log(wms_url);
                 type: 'POST',
                 url: "/apps/swat2/save_json/",
                 data: JSON.stringify(upstreamJson),
-                success: function(result){
+                success: function (result) {
                     var bbox = result.bbox
                     var srs = result.srs
                     var new_extent = ol.proj.transformExtent(bbox, srs, 'EPSG:4326');
@@ -729,7 +731,7 @@ console.log(wms_url);
         })
     }
 
-    clip_rasters = function(raster_type) {
+    clip_rasters = function (raster_type) {
 
         var watershed = sessionStorage.watershed
         var userId = sessionStorage.userId
@@ -748,7 +750,7 @@ console.log(wms_url);
                 'outletID': outletID,
                 'raster_type': raster_type
             },
-            success: function(data) {
+            success: function (data) {
                 if (data.raster_type == 'lulc') {
                     lulc_map.removeLayer(upstreamOverlaySubbasin)
                     $('#clip_lulc').attr("disabled", true)
@@ -760,7 +762,7 @@ console.log(wms_url);
                     //     Set the wms source to the url, workspace, and store for the subbasins of the selected watershed
                     var lulc_wms_source = new ol.source.ImageWMS({
                         url: geoserver_url,
-                        params: {'LAYERS':lulc_store_id, 'STYLES':style},
+                        params: {'LAYERS': lulc_store_id, 'STYLES': style},
                         serverType: 'geoserver',
                         crossOrigin: 'Anonymous'
                     });
@@ -784,7 +786,7 @@ console.log(wms_url);
                     //     Set the wms source to the url, workspace, and store for the subbasins of the selected watershed
                     var soil_wms_source = new ol.source.ImageWMS({
                         url: geoserver_url,
-                        params: {'LAYERS':soil_store_id, 'STYLES':style},
+                        params: {'LAYERS': soil_store_id, 'STYLES': style},
                         serverType: 'geoserver',
                         crossOrigin: 'Anonymous'
                     });
@@ -803,13 +805,13 @@ console.log(wms_url);
         })
     }
 
-    add_streams = function() {
+    add_streams = function () {
 //      add the streams for the selected watershed
         var store = $('#watershed_select option:selected').val().split('|')[1] + '-reach'
         var store_id = gs_workspace + ':' + store
 
 //      Set the style for the streams layer
-        var sld_string = '<StyledLayerDescriptor version="1.0.0"><NamedLayer><Name>'+ store_id + '</Name><UserStyle><FeatureTypeStyle><Rule>\
+        var sld_string = '<StyledLayerDescriptor version="1.0.0"><NamedLayer><Name>' + store_id + '</Name><UserStyle><FeatureTypeStyle><Rule>\
             <Name>rule1</Name>\
             <Title>Blue Line</Title>\
             <Abstract>A solid blue line with a 2 pixel width</Abstract>\
@@ -827,7 +829,7 @@ console.log(wms_url);
 //      Set the wms source to the url, workspace, and store for the streams of the selected watershed
         wms_source = new ol.source.ImageWMS({
             url: geoserver_url,
-            params: {'LAYERS':store_id,'SLD_BODY':sld_string},
+            params: {'LAYERS': store_id, 'SLD_BODY': sld_string},
             serverType: 'geoserver',
             crossOrigin: 'Anonymous'
         });
@@ -842,12 +844,12 @@ console.log(wms_url);
 
     };
 
-    add_basins = function(){
+    add_basins = function () {
 //      add the basins for the selected watershed
         var store = $('#watershed_select option:selected').val().split('|')[1] + '-subbasin'
         var store_id = gs_workspace + ':' + store
 //      Set the style for the subbasins layer
-        var sld_string = '<StyledLayerDescriptor version="1.0.0"><NamedLayer><Name>'+ store_id + '</Name><UserStyle><FeatureTypeStyle><Rule>\
+        var sld_string = '<StyledLayerDescriptor version="1.0.0"><NamedLayer><Name>' + store_id + '</Name><UserStyle><FeatureTypeStyle><Rule>\
             <PolygonSymbolizer>\
             <Name>rule1</Name>\
             <Title>Watersheds</Title>\
@@ -870,7 +872,7 @@ console.log(wms_url);
 //      Set the wms source to the url, workspace, and store for the subbasins of the selected watershed
         wms_source = new ol.source.ImageWMS({
             url: geoserver_url,
-            params: {'LAYERS':store_id,'SLD_BODY':sld_string},
+            params: {'LAYERS': store_id, 'SLD_BODY': sld_string},
             serverType: 'geoserver',
             crossOrigin: 'Anonymous'
         });
@@ -884,7 +886,7 @@ console.log(wms_url);
 
     }
 
-    add_stations = function() {
+    add_stations = function () {
 //      add the streams for the selected watershed
         var store = $('#watershed_select option:selected').val().split('|')[1] + '-stations'
         var store_id = gs_workspace + ':' + store
@@ -892,7 +894,7 @@ console.log(wms_url);
 //      Set the wms source to the url, workspace, and store for the streams of the selected watershed
         wms_source = new ol.source.ImageWMS({
             url: geoserver_url,
-            params: {'LAYERS':store_id,'STYLES':'point'},
+            params: {'LAYERS': store_id, 'STYLES': 'point'},
             serverType: 'geoserver',
             crossOrigin: 'Anonymous'
         });
@@ -928,9 +930,8 @@ console.log(wms_url);
 //      add lulc layer to the map
         map.addLayer(lulc_layer);
 
-        var img = $('<img id="legend">');
-        img.attr("src", geoserver_url + '?request=GetLegendGraphic&version=1.1.0&format=image/png&width=10&height=10&layer=' + store_id)
-        img.appendTo('#legend_container')
+
+
 
     }
 
@@ -956,8 +957,8 @@ console.log(wms_url);
 //      add soil layer to the map
         map.addLayer(soil_layer);
 
-        var img = $('<img id="legend">');
-        img.attr("src", geoserver_url + '?request=GetLegendGraphic&version=1.1.0&format=image/png&width=10&height=10&layer=' + store_id)
+        var img = $('');
+     //   img.attr("src", geoserver_url + '?request=GetLegendGraphic&version=1.1.0&format=image/png&width=10&height=10&layer=' + store_id)
         img.appendTo('#legend_container')
     }
 
@@ -986,17 +987,23 @@ console.log(wms_url);
                 add_basins();
                 // add_streams();
                 add_stations();
+                                document.getElementById("legend_container").style.display="block";
+
             } else if (($('#soilOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass("off")) && (!$(".stationToggle .toggle").hasClass("off"))) {
                 $('#legend_container > img').remove();
                 add_soil();
                 add_basins();
                 // add_streams();
                 add_stations();
+                                 document.getElementById("legend_container").style.display="block";
+
+
             } else if (($('#noneOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass("off")) && (!$(".stationToggle .toggle").hasClass("off"))) {
                 $('#legend_container > img').remove();
                 add_basins();
                 // add_streams();
                 add_stations();
+                 document.getElementById("legend_container").style.display="none";
             } else if (($('#lulcOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass("off")) && ($(".stationToggle .toggle").hasClass("off"))) {
                 $('#legend_container > img').remove();
                 add_lulc();
@@ -1025,6 +1032,7 @@ console.log(wms_url);
                 $('#legend_container > img').remove();
                 // add_streams();
                 add_stations();
+
             } else if (($('#lulcOption').is(':checked')) && ($(".basinToggle .toggle").hasClass("off")) && ($(".stationToggle .toggle").hasClass("off"))) {
                 $('#legend_container > img').remove();
                 add_lulc();
@@ -1118,13 +1126,7 @@ console.log(wms_url);
 
     get_time_series = function(watershed_id, watershed, start, end, parameters, streamID, fileType) {
 //      Function to pass selected dates, parameters, and streamID to the rch data parser python function and then plot the data
-        var monthOrDay
-        monthOrDay = 'Daily'
-//        if ($(".toggle").hasClass( "off" )) {
-//            monthOrDay = 'Daily'
-//        } else {
-//            monthOrDay = 'Monthly'
-//        }
+
 //      AJAX call to the timeseries python controller to run the rch data parser function
         $.ajax({
             type: 'POST',
@@ -1781,7 +1783,14 @@ console.log(wms_url);
                 parameters.push( $( this ).val());
             });
             var streamID = sessionStorage.streamID
-            var fileType = 'rch'
+            var fileType = 'rch';
+
+       if ($(".chartToggle .toggle").hasClass( "off" )){
+           monthOrDay = 'Daily'
+       } else {
+           monthOrDay = 'Monthly'
+       }
+       console.log(monthOrDay);
             get_time_series(watershed_id, watershed, start, end, parameters, streamID, fileType);
         })
 

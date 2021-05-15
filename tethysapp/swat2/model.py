@@ -14,6 +14,9 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import text
 from .app import Swat2
 import tethysapp.swat2.config as cfg
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
 
 import  psycopg2
 import logging
@@ -258,6 +261,52 @@ def extract_daily_rch(watershed, watershed_id, start, end, parameters, reachid):
     cur.close()
     return rchDict
 
+def extract_monthly_rch(watershed, watershed_id, start, end, parameters, reachid):
+    dt_start = datetime.strptime(start, '%B %d, %Y').strftime('%Y-%m-%d')
+    dt_end = datetime.strptime(end, '%B %d, %Y').strftime('%Y-%m-%d')
+    daterange = pd.date_range(start, end, freq='MS')
+
+    sss=[d.strftime('%Y-%m-%d') for d in daterange]
+    print(sss)
+    daterange = daterange.union([daterange[-1]])
+    daterange_str = [d.strftime('%b %d, %Y') for d in daterange]
+    print(daterange_str)
+    daterange_mil = [int(d.strftime('%s')) * 1000 for d in daterange]
+
+    rchDict = {'Watershed': watershed,
+               'Dates': daterange_str,
+               'ReachID': reachid,
+               'Parameters': parameters,
+               'Values': {},
+               'Names': [],
+               'Timestep': 'Monthly',
+               'FileType': 'rch'}
+
+    conn = psycopg2.connect(
+        "dbname={0} user={1} host={2} password={3}".format(cfg.db['name'], cfg.db['user'], cfg.db['host'],
+                                                           cfg.db['pass']))
+    cur = conn.cursor()
+    for x in range(0, len(parameters)):
+        param_name = rch_param_names[parameters[x]]
+        rchDict['Names'].append(param_name)
+
+        rch_qr = """SELECT val FROM output_rch WHERE watershed_id={0} AND reach_id={1} AND var_name='{2}' AND year_month_day in {3}; """.format(
+            watershed_id, reachid, parameters[x], tuple(sss))
+        #print(rch_qr)
+        cur.execute(rch_qr)
+        data = cur.fetchall()
+
+        ts = []
+        i = 0
+        while i < len(data):
+            ts.append([daterange_mil[i], data[i][0]])
+            i += 1
+
+        rchDict['Values'][x] = ts
+        rchDict['Names'].append(param_name)
+    cur.close()
+    return rchDict
+
 def extract_sub(watershed, watershed_id, start, end, parameters, subid):
     dt_start = datetime.strptime(start, '%B %d, %Y').strftime('%Y-%m-%d')
     dt_end = datetime.strptime(end, '%B %d, %Y').strftime('%Y-%m-%d')
@@ -429,11 +478,10 @@ def coverage_stats(watershed, watershed_id, unique_id, outletID, raster_type):
                     soil_dict['classValues'][record[3]] = unique_dict[val]
         return (soil_dict)
 
-
 #nasaaccess function
 def nasaaccess_run(userId, streamId, email, functions, watershed, start, end):
 
-    logging.basicConfig(filename=nasaaccess_log, level=logging.INFO)
+    logging.basicConfig(filename=R_log, level=logging.INFO)
 
     #identify where each of the input files are located in the server
     logging.info('Running nasaaccess from SWAT Data Viewer application')
@@ -441,18 +489,27 @@ def nasaaccess_run(userId, streamId, email, functions, watershed, start, end):
     dem_path = os.path.join(data_path, watershed, 'Land', 'dem' + '.tif')
     #create a new folder to store the user's requested data
     unique_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
-    unique_path = os.path.join(nasaaccess_path, 'outputs', unique_id)
+    unique_path = os.path.join(R_path, 'outputs', unique_id,'nasaaccess_data')
+
+    if not os.path.exists(unique_path):
+        os.makedirs(unique_path)
     #create a temporary directory to store all intermediate data while nasaaccess functions run
-    tempdir = os.path.join(nasaaccess_temp, unique_id)
+    tempdir = os.path.join(R_temp, unique_id)
 
     functions = ','.join(functions)
 
     try:
         logging.info("trying to run nasaaccess functions")
         #pass user's inputs and file paths to the nasaaccess python function that will run detached from the app
-        run = subprocess.call([nasaaccess_py3, nasaaccess_script, email, functions, unique_id,
-                                shp_path, dem_path, unique_path, tempdir, start, end])
 
+
+        # run = subprocess.call([nasaaccess_py3, nasaaccess_script, email, functions, unique_id,
+        #                         shp_path, dem_path, unique_path, tempdir, start, end])
+
+        run = subprocess.Popen([nasaaccess_R, R_script, email, functions, unique_id,
+                                shp_path, dem_path, unique_path, tempdir+'/', start, end])
+
+        # send_email(email, unique_id)
         return "nasaaccess is running"
     except Exception as e:
         logging.info(str(e))
