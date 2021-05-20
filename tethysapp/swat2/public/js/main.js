@@ -929,7 +929,9 @@ var LIBRARY_OBJECT = (function() {
 
 //      add lulc layer to the map
         map.addLayer(lulc_layer);
-
+var img = document.createElement('img');
+     img.src =  geoserver_url + '?request=GetLegendGraphic&version=1.1.0&format=image/png&width=10&height=10&layer=' + store_id;
+       document.getElementById('legend_container').appendChild(img);
 
 
 
@@ -957,9 +959,10 @@ var LIBRARY_OBJECT = (function() {
 //      add soil layer to the map
         map.addLayer(soil_layer);
 
-        var img = $('');
-     //   img.attr("src", geoserver_url + '?request=GetLegendGraphic&version=1.1.0&format=image/png&width=10&height=10&layer=' + store_id)
-        img.appendTo('#legend_container')
+     var img = document.createElement('img');
+     img.src =  geoserver_url + '?request=GetLegendGraphic&version=1.1.0&format=image/png&width=10&height=10&layer=' + store_id;
+       document.getElementById('legend_container').appendChild(img);
+
     }
 
 
@@ -987,7 +990,7 @@ var LIBRARY_OBJECT = (function() {
                 add_basins();
                 // add_streams();
                 add_stations();
-                                document.getElementById("legend_container").style.display="block";
+                            //    document.getElementById("legend_container").style.display="block";
 
             } else if (($('#soilOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass("off")) && (!$(".stationToggle .toggle").hasClass("off"))) {
                 $('#legend_container > img').remove();
@@ -995,7 +998,7 @@ var LIBRARY_OBJECT = (function() {
                 add_basins();
                 // add_streams();
                 add_stations();
-                                 document.getElementById("legend_container").style.display="block";
+                               //  document.getElementById("legend_container").style.display="block";
 
 
             } else if (($('#noneOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass("off")) && (!$(".stationToggle .toggle").hasClass("off"))) {
@@ -1003,7 +1006,7 @@ var LIBRARY_OBJECT = (function() {
                 add_basins();
                 // add_streams();
                 add_stations();
-                 document.getElementById("legend_container").style.display="none";
+                // document.getElementById("legend_container").style.display="none";
             } else if (($('#lulcOption').is(':checked')) && (!$(".basinToggle .toggle").hasClass("off")) && ($(".stationToggle .toggle").hasClass("off"))) {
                 $('#legend_container > img').remove();
                 add_lulc();
