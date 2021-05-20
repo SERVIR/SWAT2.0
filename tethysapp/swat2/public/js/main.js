@@ -930,7 +930,7 @@ var LIBRARY_OBJECT = (function() {
 //      add lulc layer to the map
         map.addLayer(lulc_layer);
 var img = document.createElement('img');
-     img.src =  geoserver_url + '?request=GetLegendGraphic&version=1.1.0&format=image/png&width=10&height=10&layer=' + store_id;
+     img.src =  geoserver_url + '?request=GetLegendGraphic&version=1.1.0&format=image/png&width=10&height=10&layer=' + store_id+'&LEGEND_OPTIONS=bgColor:0xefefef;fontSize:14';
        document.getElementById('legend_container').appendChild(img);
 
 
@@ -960,7 +960,7 @@ var img = document.createElement('img');
         map.addLayer(soil_layer);
 
      var img = document.createElement('img');
-     img.src =  geoserver_url + '?request=GetLegendGraphic&version=1.1.0&format=image/png&width=10&height=10&layer=' + store_id;
+     img.src =  geoserver_url + '?request=GetLegendGraphic&version=1.1.0&format=image/png&width=10&height=10&layer=' + store_id+'&LEGEND_OPTIONS=bgColor:0xefefef;fontSize:14;labelMargin:15;fontStyle:Italic;forceRule:True';
        document.getElementById('legend_container').appendChild(img);
 
     }
