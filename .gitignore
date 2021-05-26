@@ -1,0 +1,14 @@
+tethysapp/swat2/config.py
+tethysapp/swat2/upload_new_model.py
+*.pydevproject
+*.project
+*.egg-info
+*.class
+*.pyo
+*.pyc
+*.db
+*.sqlite
+*.DS_Store
+*.json
+*.tif
+*.csv
