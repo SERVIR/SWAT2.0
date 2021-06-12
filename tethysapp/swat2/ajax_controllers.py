@@ -10,7 +10,7 @@ from .app import Swat2
 from .config import *
 from wsgiref.util import FileWrapper
 import logging
-
+from shutil import copyfile
 
 LOG_FILENAME = "/home/tethys/subprocesses/ajaxc.log"
 for handler in logging.root.handlers[:]:
@@ -83,6 +83,7 @@ def timeseries(request):
         if monthOrDay == 'Monthly':
             #print({'Error': 'No monthly data available currently'})
             timeseries_dict = extract_monthly_rch(watershed,watershed_id, start, end, parameters, streamID)
+
         else:
             timeseries_dict = extract_daily_rch(watershed, watershed_id, start, end, parameters, streamID)
     elif file_type == 'sub':
@@ -118,16 +119,33 @@ def run_nasaaccess(request):
     end = request.POST.get(str('endDate'))
     d_end = str(datetime.strptime(end, '%B %d, %Y').strftime('%Y-%m-%d'))
     functions = request.POST.getlist('functions[]')
+    nexgdpp=request.POST.getlist('nexgdpp[]')
     watershed = request.POST.get('watershed')
     email = request.POST.get('email')
-    nasaaccess_run(userId, streamId, email, functions, watershed, d_start, d_end)
+    nasaaccess_run(userId, streamId, email, functions, watershed, d_start, d_end,nexgdpp)
     return HttpResponseRedirect('../')
 
 def save_file(request):
     data_json = json.loads(request.body)
+
     file_dict = write_csv(data_json)
     json_dict = JsonResponse(file_dict)
     return json_dict
+
+def save_file_lulc(request):
+    if request.method == 'POST':
+        uniqueID = request.POST['userID']
+        path_to_file = os.path.join(data_path, 'lower_mekong/Land/lulc_key.txt')
+        copyfile(path_to_file, os.path.join(temp_workspace,uniqueID,"lulc_key.txt"))
+        json_dict = JsonResponse({"filename":"lulc_key.txt"})
+        return json_dict
+def save_file_soil(request):
+    if request.method == 'POST':
+        uniqueID = request.POST['userID']
+        path_to_file = os.path.join(data_path, 'lower_mekong/Land/soil_key.txt')
+        copyfile(path_to_file, os.path.join(temp_workspace,uniqueID,"soil_key.txt"))
+        json_dict = JsonResponse({"filename":"soil_key.txt"})
+        return json_dict
 
 def download_files(request):
     if request.method == 'POST':

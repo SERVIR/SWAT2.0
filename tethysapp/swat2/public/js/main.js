@@ -77,7 +77,12 @@ var LIBRARY_OBJECT = (function() {
         reset_all,
         nasaaccess_validate,
         nasaaccess,
-        init_all
+        init_all,
+        add_to_cart_lulc,
+        add_to_cart_soil,
+        getStationDetails,
+    setDates;
+       var nexgdpp=[];
 
     /************************************************************************
      *                    PRIVATE FUNCTION IMPLEMENTATIONS
@@ -170,6 +175,7 @@ var LIBRARY_OBJECT = (function() {
         map = new ol.Map({
             target: document.getElementById("map"),
             layers: layers,
+
             view: view
         });
 
@@ -411,8 +417,50 @@ var LIBRARY_OBJECT = (function() {
         map.crossOrigin = 'anonymous';
 
     };
+    setDates=function(slice){
+         if( slice === "rcp85" || slice=== "rcp45") {
+                $("#nex_from").datepicker("destroy");
+               $("#nex_to").datepicker("destroy");
+            $('#nex_from').datepicker({
+                //..
+                format: "yyyy-mm-dd",
+                autoclose: true,
+                language: 'en',
+                startDate: '2006-01-01',
+            });
+            $('#nex_to').datepicker({
+                //..
+                autoclose: true,
+                format: "yyyy-mm-dd",
+                language: 'en',
+                startDate: "2006-01-01"
+            });
+
+        }
+        else {
+              $("#nex_from").datepicker("destroy");
+               $("#nex_to").datepicker("destroy");
+            $('#nex_from').datepicker({
+                //..
+                format: "yyyy-mm-dd",
+                autoclose: true,
+                language: 'en',
+                startDate: "1950-01-01",
+                endDate: "2005-12-31"
+            });
+            $('#nex_to').datepicker({
+                //..
+                autoclose: true,
+                format: "yyyy-mm-dd",
+                language: 'en',
+                startDate: "1950-01-01",
+                endDate: "2005-12-31"
+            });
+        }
+    };
 
     init_events = function () {
+       setDates('rcp45');
         (function () {
             var target, observer, config;
             // select the target node
@@ -433,8 +481,16 @@ var LIBRARY_OBJECT = (function() {
 
             observer.observe(target, config);
         }());
+        $( "#nex_slice" ).change(function() {
+          setDates($('#nex_slice :selected').text());
+        });
+
 
         map.on("singleclick", function (evt) {
+                var container = document.getElementById('popup');
+var content = document.getElementById('popup-content');
+var closer = document.getElementById('popup-closer');
+ container.style.display="none";
 
             if (map.getTargetElement().style.cursor == "pointer") {
 
@@ -443,24 +499,28 @@ var LIBRARY_OBJECT = (function() {
                 }
 
                 reset_all();
-
-                var store = $('#watershed_select option:selected').val().split('|')[1]
-                var reach_store_id = gs_workspace + ':' + store + '-reach'
-                var basin_store_id = gs_workspace + ':' + store + '-subbasin'
-
-
-                var clickCoord = evt.coordinate;
                 var view = map.getView();
                 var viewResolution = view.getResolution();
+                if (($(".watershedToggle .toggle").hasClass("off"))) {
 
-                var wms_url = current_layer.getSource().getGetFeatureInfoUrl(evt.coordinate, viewResolution, view.getProjection(), {'INFO_FORMAT': 'application/json'}); //Get the wms url for the clicked point
-                console.log(wms_url);
-                if (wms_url) {
+                    var popup = new ol.Overlay({
+                        element: document.getElementById('popup')
+                    });
+                    map.addOverlay(popup);
+                    popup.setPosition(evt.coordinate);
 
-                    //Retrieving the details for clicked point via the url
+
+                    closer.onclick = function () {
+                        popup.setPosition(undefined);
+                        closer.blur();
+                        return false;
+                    };
+
+
+                    var station_url = stations_layer.getSource().getGetFeatureInfoUrl(evt.coordinate, viewResolution, view.getProjection(), {'INFO_FORMAT': 'application/json'}); //Get the wms url for the clicked point
                     $.ajax({
                         type: "GET",
-                        url: wms_url,
+                        url: station_url,
                         dataType: 'json',
                         success: function (result) {
                             if (parseFloat(result["features"].length < 1)) {
@@ -471,42 +531,96 @@ var LIBRARY_OBJECT = (function() {
                                     $('#error').addClass('hidden')
                                 }, 5000);
                             }
-                            console.log(result["features"][0]["properties"]);
-                            var streamID = parseFloat(result["features"][0]["properties"]["Subbasin"]);
-                            console.log('*****************');
-                            console.log(streamID);
-                            sessionStorage.setItem('streamID', streamID)
-                            var watershed = $('#watershed_select option:selected').val().split('|')[1]
-                            sessionStorage.setItem('watershed', watershed)
-                            var watershed_id = $('#watershed_select option:selected').val().split('|')[0]
-                            sessionStorage.setItem('watershed_id', watershed_id)
-                            $('#rch_tab').addClass('active');
-                            $('#sub_tab').removeClass('active');
-                            $('#lulc_tab').removeClass('active');
-                            if (sessionStorage.lulc_avail === 'Yes') {
-                                $('#clip_lulc').attr('disabled', false)
-                                $('#lulc_compute').attr('disabled', true)
-                            }
-                            $('#soil_tab').removeClass('active');
-                            if (sessionStorage.soil_avail === 'Yes') {
-                                $('#clip_soil').attr('disabled', false)
-                                $('#soil_compute').attr('disabled', true)
-                            }
-                            $('#nasaaccess_tab').removeClass('active');
-                            $('#datacart_tab').removeClass('active');
-                            $('#rch_link').addClass('active');
-                            $('#sub_link').removeClass('active');
-                            $('#lulc_link').removeClass('active');
-                            $('#soil_link').removeClass('active');
-                            $('#nasaaccess_link').removeClass('active');
-                            $('#datacart_link').removeClass('active');
-                            $("#data-modal").modal('show');
-                            $("#data-modal-btn").removeClass('hidden');
+                            if(result["features"][0]) {
+                                var station_name = result["features"][0]["properties"]["Name"];
+                                //         var station_details = getStationDetails(station_name);
+                                var i = 0;
 
-                            get_upstream(reach_store_id, basin_store_id, watershed, watershed_id, streamID, sessionStorage.userId);
-
+                                for (i = 0; i < stations.length; i++) {
+                                    if (stations[i].Name === station_name) {
+                                        container.style.display = "block";
+                                        //return stations[i];
+                                        var Station_code = stations[i].Station_code;
+                                        var River = stations[i].River;
+                                        var Lmb_id = stations[i].Lmb_id;
+                                        var Name = stations[i].Name;
+                                        var point_x = stations[i].point_x;
+                                        var point_y = stations[i].point_y;
+                                        var URL = stations[i].URL === "" ? "Unavailable" : stations[i].URL;
+                                        content.innerHTML = '<table class="station_class"><tr><td>Station Name</td><td>' + station_name + '</td></tr><tr><td>Station Code</td><td>' + Station_code + '' +
+                                            '</td></tr><tr><td>River</td><td>' + River + '</td></tr><tr><td>Lmb ID</td><td>' + Lmb_id + '</td></tr><tr><td>Point X</td><td>' + point_x + '</td></tr>' +
+                                            '<tr><td>Point Y</td><td>' + point_y + '</td></tr><tr><td>URL</td><td>' + URL + '</td></tr></table>';
+                                    }
+                                }
+                            }
                         }
+
                     });
+                } else {
+                    container.style.display = "none";
+                    var store = $('#watershed_select option:selected').val().split('|')[1]
+                    var reach_store_id = gs_workspace + ':' + store + '-reach'
+                    var basin_store_id = gs_workspace + ':' + store + '-subbasin'
+
+
+                    var clickCoord = evt.coordinate;
+                    var view = map.getView();
+                    var viewResolution = view.getResolution();
+
+                    var wms_url = current_layer.getSource().getGetFeatureInfoUrl(evt.coordinate, viewResolution, view.getProjection(), {'INFO_FORMAT': 'application/json'}); //Get the wms url for the clicked point
+                    if (wms_url) {
+
+                        //Retrieving the details for clicked point via the url
+                        $.ajax({
+                            type: "GET",
+                            url: wms_url,
+                            dataType: 'json',
+                            success: function (result) {
+                                if (parseFloat(result["features"].length < 1)) {
+                                    $('#error').html('<p class="alert alert-danger" style="text-align: center"><strong>An unknown error occurred while retrieving the data. Please try again</strong></p>');
+                                    $('#error').removeClass('hidden');
+
+                                    setTimeout(function () {
+                                        $('#error').addClass('hidden')
+                                    }, 5000);
+                                }
+                                var streamID = parseFloat(result["features"][0]["properties"]["Subbasin"]);
+                                sessionStorage.setItem('streamID', streamID)
+                                var watershed = $('#watershed_select option:selected').val().split('|')[1]
+                                sessionStorage.setItem('watershed', watershed)
+                                var watershed_id = $('#watershed_select option:selected').val().split('|')[0]
+                                sessionStorage.setItem('watershed_id', watershed_id)
+                                $('#rch_tab').addClass('active');
+                                $('#sub_tab').removeClass('active');
+                                $('#lulc_tab').removeClass('active');
+                                if (sessionStorage.lulc_avail === 'Yes') {
+                                    // $('#clip_lulc').attr('disabled', false)
+                                    $('#clip_and_compute_lulc').attr('disabled', false)
+
+                                    // $('#lulc_compute').attr('disabled', true)
+                                }
+                                $('#soil_tab').removeClass('active');
+                                if (sessionStorage.soil_avail === 'Yes') {
+                                    // $('#clip_soil').attr('disabled', false)
+                                    // $('#soil_compute').attr('disabled', true)
+                                    $('#clip_and_compute_soil').attr('disabled', false)
+                                }
+                                $('#nasaaccess_tab').removeClass('active');
+                                $('#datacart_tab').removeClass('active');
+                                $('#rch_link').addClass('active');
+                                $('#sub_link').removeClass('active');
+                                $('#lulc_link').removeClass('active');
+                                $('#soil_link').removeClass('active');
+                                $('#nasaaccess_link').removeClass('active');
+                                $('#datacart_link').removeClass('active');
+                                $("#data-modal").modal('show');
+                                $("#data-modal-btn").removeClass('hidden');
+
+                                get_upstream(reach_store_id, basin_store_id, watershed, watershed_id, streamID, sessionStorage.userId);
+
+                            }
+                        });
+                    }
                 }
             }
         });
@@ -551,7 +665,6 @@ var LIBRARY_OBJECT = (function() {
                 }
                 var reach_url = geoserver_url + 'ows?service=wfs&version=2.0.0&request=getfeature&typename=' + reach_store_id + '&CQL_FILTER=Subbasin=' + streamID + '&outputFormat=application/json&srsname=EPSG:4326&,EPSG:4326'
                 var upstream_reach_url = geoserver_url + 'ows?service=wfs&version=2.0.0&request=getfeature&typename=' + reach_store_id + '&CQL_FILTER=' + cql_filter + '&outputFormat=application/json&srsname=EPSG:4326&,EPSG:4326'
-                console.log(upstream_reach_url);
                 var streamVectorSource = new ol.source.Vector({
                     format: new ol.format.GeoJSON(),
                     url: reach_url,
@@ -753,8 +866,9 @@ var LIBRARY_OBJECT = (function() {
             success: function (data) {
                 if (data.raster_type == 'lulc') {
                     lulc_map.removeLayer(upstreamOverlaySubbasin)
-                    $('#clip_lulc').attr("disabled", true)
-                    $('#lulc_compute').attr("disabled", false)
+                    // $('#clip_lulc').attr("disabled", true)
+                    // $('#lulc_compute').attr("disabled", false)
+                        $('#clip_and_compute_lulc').attr("disabled",false);
                     var lulc_store = watershed + '_upstream_lulc_' + outletID
                     var lulc_store_id = gs_workspace + ':' + lulc_store
                     var style = watershed + '-' + data.raster_type
@@ -777,8 +891,9 @@ var LIBRARY_OBJECT = (function() {
                 }
                 if (data.raster_type == 'soil') {
                     soil_map.removeLayer(upstreamOverlaySubbasin)
-                    $('#clip_soil').attr("disabled", true)
-                    $('#soil_compute').attr("disabled", false)
+                    // $('#clip_soil').attr("disabled", true)
+                    // $('#soil_compute').attr("disabled", false)
+                    $('#clip_and_compute_soil').attr("disabled",false);
                     var soil_store = watershed + '_upstream_soil_' + outletID
                     var soil_store_id = gs_workspace + ':' + soil_store
                     var style = watershed + '-' + data.raster_type
@@ -977,8 +1092,6 @@ var img = document.createElement('img');
 
     toggleLayers = function() {
             if((!$(".watershedToggle .toggle").hasClass( "off" ))) {
-                console.log("watershed")
-
                 add_streams();
             }
             else {
@@ -1062,13 +1175,15 @@ var img = document.createElement('img');
             sub_map.updateSize();
             sub_map.getView().fit(sessionStorage.basinExtent.split(',').map(Number), sub_map.getSize());
         } else if ($("#lulc_link").hasClass('active')) {
-            $('#clip_lulc').removeClass('hidden')
-            $('#lulc_compute').removeClass('hidden')
+            // $('#clip_lulc').removeClass('hidden')
+            // $('#lulc_compute').removeClass('hidden')
+             $('#clip_and_compute_lulc').removeClass('hidden')
             lulc_map.updateSize();
             lulc_map.getView().fit(sessionStorage.basinExtent.split(',').map(Number), lulc_map.getSize());
         } else if ($('#soil_link').hasClass('active')) {
-            $('#clip_soil').removeClass('hidden')
-            $('#soil_compute').removeClass('hidden')
+            // $('#clip_soil').removeClass('hidden')
+            // $('#soil_compute').removeClass('hidden')
+    $('#clip_and_compute_soil').removeClass('hidden')
             soil_map.updateSize();
             soil_map.getView().fit(sessionStorage.basinExtent.split(',').map(Number), soil_map.getSize());
         } else if ($('#nasaaccess_link').hasClass('active')) {
@@ -1083,14 +1198,11 @@ var img = document.createElement('img');
     updateView = function() {
         var store = $('#watershed_select option:selected').val().split('|')[1]
         var store_id = gs_workspace + ':' + store + '-reach'
-        console.log(store_id)
         var layerParams
         var layer_xml
         var bbox
         var srs
-        console.log(srs);
         var wmsCapUrl = geoserver_url + '?service=WMS&version=1.1.1&request=GetCapabilities&'
-        console.log(wmsCapUrl)
 //      Get the extent and projection of the selected watershed and set the map view to fit it
         $.ajax({
             type: "GET",
@@ -1104,14 +1216,12 @@ var img = document.createElement('img');
                 for (var i=0; i<layers.length; i++) {
                     if(layers[i].Title == store + '-subbasin') {
                         layer_xml = xml.getElementsByTagName('Layer')[i+1]
-                        console.log(layer_xml)
                         layerParams = layers[i]
                     }
                 }
 
                 srs = layer_xml.getElementsByTagName('SRS')[0].innerHTML
                 bbox = layerParams.BoundingBox[0].extent
-                console.log(bbox)
                 var new_extent = ol.proj.transformExtent(bbox, srs, 'EPSG:4326');
                 var center = ol.extent.getCenter(new_extent)
                 var view = new ol.View({
@@ -1310,6 +1420,37 @@ var img = document.createElement('img');
                         $('#sub_save_success').addClass('hidden')
                     }, 5000);
                 }
+
+            }
+        });
+    };
+      add_to_cart_soil = function(){
+           var userID = sessionStorage.userId;
+        $.ajax({
+            type: 'POST',
+            url: "/apps/swat2/save_file_soil/",
+            data:{"userID":userID},
+            success: function(result){
+               var newrow = '<tr><td>soil_key</td><td>TXT</td><td>' +sessionStorage.streamID + '</td></tr>'
+                    $('#tBodySpatial').append(newrow);
+                var newrow = '<tr><td>soil_legend</td><td>PNG</td><td>' +sessionStorage.streamID + '</td></tr>'
+                    $('#tBodySpatial').append(newrow);
+
+            }
+        });
+    };
+
+       add_to_cart_lulc = function(){
+            var userID = sessionStorage.userId;
+        $.ajax({
+            type: 'POST',
+            url: "/apps/swat2/save_file_lulc/",
+            data: {"userID":userID},
+            success: function(result){
+          var newrow = '<tr><td>lulc_key</td><td>TXT</td><td>' + sessionStorage.streamID + '</td></tr>'
+                    $('#tBodySpatial').append(newrow);
+          var newrow = '<tr><td>lulc_legend</td><td>PNG</td><td>' + sessionStorage.streamID  + '</td></tr>'
+                    $('#tBodySpatial').append(newrow);
 
             }
         });
@@ -1579,29 +1720,33 @@ var img = document.createElement('img');
                     $('#lulcOption').attr('disabled', false)
                     $('#lulcToggle').attr('disabled', false)
                     $('#lulc-not-avail').addClass('hidden')
-                    $('#clip_lulc').attr('disabled', false)
-                    $('#lulc_compute').attr('disabled', true)
+                    // $('#clip_lulc').attr('disabled', false)
+                    // $('#lulc_compute').attr('disabled', true)
+                        $('#clip_and_compute_lulc').attr("disabled",false);
                     $('#lulcOption').attr('disabled', false)
                 } else {
                     $('#lulcOption').attr('disabled', true)
                     $('#lulcToggle').attr('disabled', true)
                     $('#lulc-not-avail').removeClass('hidden')
-                    $('#clip_lulc').attr('disabled', true)
-                    $('#lulc_compute').attr('disabled', true)
+                    // $('#clip_lulc').attr('disabled', true)
+                    // $('#lulc_compute').attr('disabled', true)
+                      $('#clip_and_compute_lulc').attr("disabled",true);
                 }
 
                 if (soil === 'Yes') {
                     $('#soilOption').attr('disabled', false)
                     $('#soilToggle').attr('disabled', false)
                     $('#soil-not-avail').addClass('hidden')
-                    $('#clip_soil').attr('disabled', false)
-                    $('#soil_compute').attr('disabled', true)
+                    // $('#clip_soil').attr('disabled', false)
+                    // $('#soil_compute').attr('disabled', true)
+                      $('#clip_and_compute_soil').attr("disabled",false);
                 } else {
                     $('#soilOption').attr('disabled', true)
                     $('#soilToggle').attr('disabled', true)
                     $('#soil-not-avail').removeClass('hidden')
-                    $('#clip_soil').attr('disabled', true)
-                    $('#soil_compute').attr('disabled', true)
+                    // $('#clip_soil').attr('disabled', true)
+                    // $('#soil_compute').attr('disabled', true)
+                      $('#clip_and_compute_soil').attr("disabled",true);
                 }
 
                 if (nasaaccess === 'Yes') {
@@ -1635,8 +1780,12 @@ var img = document.createElement('img');
         var start = $('#na_start_pick').val();
         var end = $('#na_end_pick').val();
         var functions = [];
+
         $('.chk:checked').each(function() {
              functions.push( $( this ).val());
+             if($( this ).val()=="NEXgdpp") {
+
+             }
         });
         var watershed = sessionStorage.watershed
         var userId = sessionStorage.userId
@@ -1653,7 +1802,8 @@ var img = document.createElement('img');
                 'endDate': end,
                 'functions': functions,
                 'watershed': watershed,
-                'email': email
+                'email': email,
+                'nexgdpp':nexgdpp,
             },
         }).done(function() {
             console.log('NASAaccess functions are running')
@@ -1678,12 +1828,14 @@ var img = document.createElement('img');
         $('#lulcPieContainer').addClass('hidden');
         $('#soilPieContainer').addClass('hidden');
         if (sessionStorage.lulc_avail === 'Yes') {
-            $('#clip_lulc').attr('disabled', false)
-            $('#lulc_compute').attr('disabled', true)
+            // $('#clip_lulc').attr('disabled', false)
+            // $('#lulc_compute').attr('disabled', true)
+              $('#clip_and_compute_lulc').attr("disabled",false);
         }
         if (sessionStorage.soil_avail === 'Yes') {
-            $('#clip_soil').attr('disabled', false)
-            $('#soil_compute').attr('disabled', true)
+            // $('#clip_soil').attr('disabled', false)
+            // $('#soil_compute').attr('disabled', true)
+              $('#clip_and_compute_soil').attr("disabled",false);
         }
         rch_map.removeLayer(featureOverlayStream)
         rch_map.removeLayer(upstreamOverlayStream)
@@ -1767,10 +1919,14 @@ var img = document.createElement('img');
         $(".nav-tabs").click(function(){
             $('#rch_compute').addClass('hidden')
             $('#sub_compute').addClass('hidden')
-            $('#clip_lulc').addClass('hidden')
-            $('#lulc_compute').addClass('hidden')
-            $('#clip_soil').addClass('hidden')
-            $('#soil_compute').addClass('hidden')
+            // $('#clip_lulc').addClass('hidden')
+            // $('#lulc_compute').addClass('hidden')
+            // $('#clip_soil').addClass('hidden')
+            // $('#soil_compute').addClass('hidden')
+            $('#clip_and_compute_lulc').addClass('hidden')
+             $('#clip_and_compute_soil').addClass('hidden')
+             $('#saveDataLulc').addClass('hidden')
+             $('#saveDataSoil').addClass('hidden')
             $('#saveData').addClass('hidden')
             $('#downloadData').addClass('hidden')
             setTimeout(updateTab, 300);
@@ -1781,6 +1937,7 @@ var img = document.createElement('img');
             var watershed_id = sessionStorage.watershed_id
             var start = $('#rch_start_pick').val();
             var end = $('#rch_end_pick').val();
+
             var parameters = []
             $('#rch_var_select option:selected').each(function() {
                 parameters.push( $( this ).val());
@@ -1811,38 +1968,82 @@ var img = document.createElement('img');
             get_time_series(watershed_id, watershed, start, end, parameters, streamID, fileType);
         })
 
-        $('#clip_lulc').click(function(){
-            clip_rasters('lulc')
-        })
-
-        $('#clip_soil').click(function(){
-            clip_rasters('soil')
-        })
-
-        $("#lulc_compute").click(function(){
-            var raster_type = 'lulc'
-            lulc_compute(raster_type);
-            $('#lulc-pie-loading').removeClass('hidden')
-        })
-
-        $("#soil_compute").click(function(){
-            var raster_type = 'soil'
-            soil_compute(raster_type);
-            $('#soil-pie-loading').removeClass('hidden')
-        })
+        // $('#clip_lulc').click(function(){
+        //     clip_rasters('lulc')
+        // })
+        //
+        // $('#clip_soil').click(function(){
+        //     clip_rasters('soil')
+        // })
+        //
+        // $("#lulc_compute").click(function(){
+        //     var raster_type = 'lulc'
+        //     lulc_compute(raster_type);
+        //     $('#lulc-pie-loading').removeClass('hidden')
+        // })
+        //
+        // $("#soil_compute").click(function(){
+        //     var raster_type = 'soil'
+        //     soil_compute(raster_type);
+        //     $('#soil-pie-loading').removeClass('hidden')
+        // })
 
         $("#saveData").click(function(){
             add_to_cart();
-        })
+        });
+          $("#saveDataSoil").click(function(){
+            add_to_cart_soil();
+        });
+            $("#saveDataLulc").click(function(){
+            add_to_cart_lulc();
+        });
+
+
+
+
+         $("#nex_save").click(function(){
+                var model = $('#nex_model :selected').text();
+                 var type = $('#nex_type :selected').text();
+                 var slice = $('#nex_slice :selected').text();
+                 var start=$('#nex_from').val();
+                 var end=$('#nex_to').val();
+                 nexgdpp.push(model);
+                 nexgdpp.push(type);
+                 nexgdpp.push(slice);
+                  nexgdpp.push(start);
+                   nexgdpp.push(end);
+         })
 
         $("#nasaaccess").click(function(){
             nasaaccess_validate();
         })
 
+        $('#clip_and_compute_lulc').click(function(){
+ $('#saveDataLulc').removeClass('hidden')
+
+            clip_rasters('lulc');
+             var raster_type = 'lulc';
+            lulc_compute(raster_type);
+         //   $('#lulc-pie-loading').removeClass('hidden');
+        });
+
+        $('#clip_and_compute_soil').click(function(){
+            $('#saveDataSoil').removeClass('hidden')
+            clip_rasters('soil');
+               var raster_type = 'soil';
+            soil_compute(raster_type);
+      //      $('#soil-pie-loading').removeClass('hidden');
+        });
 
         $("#download_data").click(function(){
             $("#download-modal").modal('show');
         })
+$('#nex_gdpp').click(function(){
+    if($(this).is(':checked')){
+         $("#nexgdpp-modal").modal('show');
+    }
+});
+
 
 
         $('#na_submit').click(function() {

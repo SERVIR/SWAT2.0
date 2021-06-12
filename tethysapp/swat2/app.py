@@ -70,6 +70,16 @@ class Swat2(TethysAppBase):
                 controller='swat2.ajax_controllers.save_file'
             ),
             UrlMap(
+                name='save_file_lulc',
+                url='swat2/save_file_lulc',
+                controller='swat2.ajax_controllers.save_file_lulc'
+            ),
+            UrlMap(
+                name='save_file_soil',
+                url='swat2/save_file_soil',
+                controller='swat2.ajax_controllers.save_file_soil'
+            ),
+            UrlMap(
                 name='download_files',
                 url='swat2/download_files',
                 controller='swat2.ajax_controllers.download_files'

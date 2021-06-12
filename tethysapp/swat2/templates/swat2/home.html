@@ -17,6 +17,7 @@
 <script src="https://code.highcharts.com/modules/drilldown.js"></script>
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.js"></script>
+
 {% endblock %}
 
 {% block header_buttons %}
@@ -74,7 +75,12 @@
 {% endblock %}
 
 {% block app_content %}
-        <div id="map" class="map"></div>
+        <div id="map" class="map" ></div>
+ <div id="popup" class="ol-popup" style="display: none">
+      <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+      <div id="popup-content">
+      </div>
+    </div>
 {% endblock %}
 
 {# Use the after_app_content block for modals #}
@@ -118,9 +124,9 @@
           <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="rch_tab">
               <div class="panel-body">
-                <div class="alert alert-danger" id="data-warning">
-                    <strong>Warning!</strong> The Lower Mekong simulated SWAT water quality data has not yet been validated and should not be used for decision support.
-                </div>
+<!--                <div class="alert alert-danger" id="data-warning">-->
+<!--                    <strong>Warning!</strong> The Lower Mekong simulated SWAT water quality data has not yet been validated and should not be used for decision support.-->
+<!--                </div>-->
                 <h6 id="error" class="hidden"></h6>
                 <div class="left">
                     <div class="alert alert-warning hidden" id="rch-not-avail">
@@ -159,9 +165,9 @@
             </div>
             <div role="tabpanel" class="tab-pane" id="sub_tab">
               <div class="panel-body">
-                <div class="alert alert-danger" id="data-warning">
-                    <strong>Warning!</strong> The Lower Mekong simulated SWAT water quality data has not yet been validated and should not be used for decision support.
-                </div>
+<!--                <div class="alert alert-danger" id="data-warning">-->
+<!--                    <strong>Warning!</strong> The Lower Mekong simulated SWAT water quality data has not yet been validated and should not be used for decision support.-->
+<!--                </div>-->
                 <h6 id="error" class="hidden"></h6>
                 <div class="left">
                     <div class="alert alert-warning hidden" id="sub-not-avail">
@@ -266,6 +272,11 @@
                             <td>GPM SWAT</td>
                             <td>Generate SWAT rainfall input files from NASA GPM/TRMM remote sensing products within watershed boundaries.</td>
                           </tr>
+                         <tr>
+                            <td><input id="nex_gdpp" class="chk" type="checkbox" value="NEXgdpp"></td>
+                            <td>NEX-GDPP</td>
+                            <td>Generate SWAT rainfall or air temperature input files as well as climate input stations file from NASA NEX-GDPP remote sensing climate change data products.</td>
+                          </tr>
                         </tbody>
                     </table>
 
@@ -325,10 +336,15 @@
           <div class="data-buttons">
             <button id="rch_compute" class="btn btn-primary" type="button">Get RCH Data</button>
             <button id="sub_compute" class="btn btn-primary hidden" type="button">Get SUB Data</button>
-            <button id="clip_lulc" class="btn btn-primary hidden" type="button">Clip LULC Raster</button>
-            <button id="lulc_compute" class="btn btn-success hidden" type="button">Compute LULC Statistics</button>
-            <button id="clip_soil" class="btn btn-primary hidden" type="button">Clip Soil Raster</button>
-            <button id="soil_compute" class="btn btn-success hidden" type="button">Compute Soil Statistics</button>
+<!--            <button id="clip_lulc" class="btn btn-primary hidden" type="button">Clip LULC Raster</button>-->
+<!--            <button id="lulc_compute" class="btn btn-success hidden" type="button">Compute LULC Statistics</button>-->
+              <button id="clip_and_compute_lulc" class="btn btn-primary hidden" type="button">Clip and Compute</button>
+                          <button id="saveDataLulc" class="btn btn-success hidden" type="button">Add Data to Cart</button>
+<!--            <button id="clip_soil" class="btn btn-primary hidden" type="button">Clip Soil Raster</button>-->
+<!--            <button id="soil_compute" class="btn btn-success hidden" type="button">Compute Soil Statistics</button>-->
+              <button id="clip_and_compute_soil" class="btn btn-primary hidden" type="button">Clip and Compute</button>
+                          <button id="saveDataSoil" class="btn btn-success hidden" type="button">Add Data to Cart</button>
+
             <button id="saveData" class="btn btn-success hidden" type="button">Add Data to Cart</button>
           </div>
           <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -364,6 +380,34 @@
       </div>
     </div>
   </div>
+
+  <div class="modal fade" id="nexgdpp-modal" tabindex="-1" role="dialog" aria-labelledby="nexgdpp-modal-label">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content"  style="width: 60%">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h5 class="modal-title" id="nexgdpp-modal-label">NEX_GDPP options</h5>
+        </div>
+        <div class="modal-body" class="form-group">
+
+            <label>Model</label><select class="form-control"  id="nex_model"><option>WCRP</option><option>CMIP5</option><option>IPSL-CM5A-MR</option><option>CM5A-MR</option></select>
+            <label>Type</label><select class="form-control" id="nex_type"><option>pr</option><option>tas</option></select>
+            <label>Slice</label><select class="form-control" id="nex_slice"><option>rcp45</option><option>rcp85</option><option>historical</option></select>
+
+            <label for="nex_from">From</label>
+            <input class="form-control" type="text" id="nex_from" name="from" data-date-start-view="decade">
+
+
+            <label  for="nex_to">To</label>
+                <input class="form-control" type="text" id="nex_to" name="to" data-date-start-view="decade">
+        </div>
+        <div class="modal-footer">
+              <button id="nex_save" type="button" class="btn btn-primary" data-dismiss="modal">Save</button>
+
+        </div>
+      </div>
+    </div>
+  </div>
 <!--<div id="popup"><p>ffff</p></div>-->
 
 <!-- Contact Information Modal -->
@@ -380,7 +424,7 @@
                 Please provide your email here and we will contact you with a
                 6 digit access code for downloading your data when the process is complete.</p>
             <label for="id_email">Email Address:</label>
-            <input id="id_email" type="email" placeholder="Email" size="30" required<input>
+            <input id="id_email" type="email" placeholder="Email" size="30" required/>
             <p>Your email will only remain in our database until your access code has been sent out.
                 The access code you receive will then be valid for 3 days.</p>
         </div>
@@ -452,12 +496,13 @@
                         </ul>
                     </li>
                 </ol>
-                <p>If you have questions, comments, or requests for further functionality please contact Spencer McDonald at <a href="mailto:spencer.mcdonald@adpc.net">spencer.mcdonald@adpc.net</a></p>
+                <p>If you have questions, comments, or requests for further functionality please contact Githika Tondapu at <a href="mailto:githika.tondapu@nasa.gov">githika.tondapu@nasa.gov</a></p>
             </div>
             <div class="modal-footer">
                 <div align="center" id="logos">
                     <div class="logo-image"><a href="http://www.usaid.gov/" target="_blank"><img src="https://servirglobal.net/Portals/_default/Skins/Servir2015/img/usaid.png"></a></div>
                     <div class="logo-image"><a href="http://appliedsciences.nasa.gov/" target="_blank"><img src="https://servirglobal.net/Portals/_default/Skins/Servir2015/img/nasa.png"></a></div>
+                      <div class="logo-image"><a href="https://www.nasa.gov/centers/goddard/about/index.html" target="_blank"><img style="max-width: 10%" src="/static/swat2/images/goddard.png"></a></div>
                     <div class="logo-image"><a href="https://servir.adpc.net/" target="_blank"><img src="https://servir.adpc.net/themes/svmk/images/optimized/Servir_Logo_Color.png"></a></div>
                     <div class="logo-image"><a href="http://www.adpc.net/" target="_blank"><img src="https://servirglobal.net/Portals/_default/Skins/Servir2015/img/adpc.png"></a></div>
                 </div>

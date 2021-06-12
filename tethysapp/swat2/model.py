@@ -245,7 +245,7 @@ def extract_daily_rch(watershed, watershed_id, start, end, parameters, reachid):
         param_name = rch_param_names[parameters[x]]
         rchDict['Names'].append(param_name)
 
-        rch_qr = """SELECT val FROM output_rch WHERE watershed_id={0} AND reach_id={1} AND var_name='{2}' AND year_month_day BETWEEN '{3}' AND '{4}'; """.format(
+        rch_qr = """SELECT distinct val FROM output_rch WHERE watershed_id={0} AND reach_id={1} AND var_name='{2}' AND year_month_day BETWEEN '{3}' AND '{4}'; """.format(
             watershed_id, reachid, parameters[x], dt_start, dt_end)
         cur.execute(rch_qr)
         data = cur.fetchall()
@@ -264,13 +264,12 @@ def extract_daily_rch(watershed, watershed_id, start, end, parameters, reachid):
 def extract_monthly_rch(watershed, watershed_id, start, end, parameters, reachid):
     dt_start = datetime.strptime(start, '%B %d, %Y').strftime('%Y-%m-%d')
     dt_end = datetime.strptime(end, '%B %d, %Y').strftime('%Y-%m-%d')
+
     daterange = pd.date_range(start, end, freq='MS')
 
     sss=[d.strftime('%Y-%m-%d') for d in daterange]
-    print(sss)
     daterange = daterange.union([daterange[-1]])
     daterange_str = [d.strftime('%b %d, %Y') for d in daterange]
-    print(daterange_str)
     daterange_mil = [int(d.strftime('%s')) * 1000 for d in daterange]
 
     rchDict = {'Watershed': watershed,
@@ -290,9 +289,8 @@ def extract_monthly_rch(watershed, watershed_id, start, end, parameters, reachid
         param_name = rch_param_names[parameters[x]]
         rchDict['Names'].append(param_name)
 
-        rch_qr = """SELECT val FROM output_rch WHERE watershed_id={0} AND reach_id={1} AND var_name='{2}' AND year_month_day in {3}; """.format(
+        rch_qr = """SELECT distinct val FROM output_rch WHERE watershed_id={0} AND reach_id={1} AND var_name='{2}' AND year_month_day in {3}; """.format(
             watershed_id, reachid, parameters[x], tuple(sss))
-        #print(rch_qr)
         cur.execute(rch_qr)
         data = cur.fetchall()
 
@@ -301,7 +299,6 @@ def extract_monthly_rch(watershed, watershed_id, start, end, parameters, reachid
         while i < len(data):
             ts.append([daterange_mil[i], data[i][0]])
             i += 1
-
         rchDict['Values'][x] = ts
         rchDict['Names'].append(param_name)
     cur.close()
@@ -328,6 +325,7 @@ def extract_sub(watershed, watershed_id, start, end, parameters, subid):
         "dbname={0} user={1} host={2} password={3}".format(cfg.db['name'], cfg.db['user'], cfg.db['host'],
                                                            cfg.db['pass']))
     cur = conn.cursor()
+
     for x in range(0, len(parameters)):
         param_name = sub_param_names[parameters[x]]
         subDict['Names'].append(param_name)
@@ -479,7 +477,7 @@ def coverage_stats(watershed, watershed_id, unique_id, outletID, raster_type):
         return (soil_dict)
 
 #nasaaccess function
-def nasaaccess_run(userId, streamId, email, functions, watershed, start, end):
+def nasaaccess_run(userId, streamId, email, functions, watershed, start, end, nexgdpp):
 
     logging.basicConfig(filename=R_log, level=logging.INFO)
 
@@ -505,9 +503,10 @@ def nasaaccess_run(userId, streamId, email, functions, watershed, start, end):
 
         # run = subprocess.call([nasaaccess_py3, nasaaccess_script, email, functions, unique_id,
         #                         shp_path, dem_path, unique_path, tempdir, start, end])
-
+        separator=","
+        nexgdpp_str=separator.join(nexgdpp)
         run = subprocess.Popen([nasaaccess_R, R_script, email, functions, unique_id,
-                                shp_path, dem_path, unique_path, tempdir+'/', start, end])
+                                shp_path, dem_path, unique_path, tempdir+'/', start, end,nexgdpp_str])
 
         # send_email(email, unique_id)
         return "nasaaccess is running"
