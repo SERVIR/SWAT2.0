@@ -417,7 +417,7 @@ def clip_raster(watershed, uniqueID, outletID, raster_type):
     input_tif = os.path.join(data_path, watershed, 'Land', raster_type + '.tif')
     output_tif = os.path.join(temp_workspace, uniqueID, watershed + '_upstream_'+ raster_type + '_' + outletID + '.tif')
     logging.info("clip raster before gdal")
-    subprocess.Popen('{0} --config GDALWARP_IGNORE_BAD_CUTLINE YES -cutline {1} -crop_to_cutline -dstalpha {2} {3}'.format(cfg.gdalwarp_path,input_json, input_tif, output_tif),shell=True).communicate() 
+    subprocess.check_output('{0} --config GDALWARP_IGNORE_BAD_CUTLINE YES -cutline {1} -crop_to_cutline -dstalpha {2} {3}'.format(cfg.gdalwarp_path,input_json, input_tif, output_tif),shell=True)
     logging.info("clip raster after gdal")
 
     storename = watershed + '_upstream_' + raster_type + '_' + outletID
