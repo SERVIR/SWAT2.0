@@ -1424,37 +1424,45 @@ var img = document.createElement('img');
             }
         });
     };
-      add_to_cart_soil = function(){
+      add_to_cart_soil = function() {
+          var userID = sessionStorage.userId;
+          $.ajax({
+              type: 'POST',
+              url: "/apps/swat2/save_file_soil/",
+              data: {"userID": userID},
+              success: function (result) {
+                  var newrow = '<tr><td>soil_key</td><td>TXT</td><td>' + sessionStorage.streamID + '</td></tr>'
+                  $('#tBodySpatial').append(newrow);
+                  var newrow = '<tr><td>soil_legend</td><td>PNG</td><td>' + sessionStorage.streamID + '</td></tr>'
+                  $('#tBodySpatial').append(newrow);
+                   $('#soil-pie-loading').addClass('hidden')
+                  $('#soil_save_success').removeClass('hidden');
+                  setTimeout(function () {
+                      $('#soil_save_success').addClass('hidden')
+                  }, 5000);
+              }
+          });
+      };
+
+       add_to_cart_lulc = function() {
            var userID = sessionStorage.userId;
-        $.ajax({
-            type: 'POST',
-            url: "/apps/swat2/save_file_soil/",
-            data:{"userID":userID},
-            success: function(result){
-               var newrow = '<tr><td>soil_key</td><td>TXT</td><td>' +sessionStorage.streamID + '</td></tr>'
-                    $('#tBodySpatial').append(newrow);
-                var newrow = '<tr><td>soil_legend</td><td>PNG</td><td>' +sessionStorage.streamID + '</td></tr>'
-                    $('#tBodySpatial').append(newrow);
-
-            }
-        });
-    };
-
-       add_to_cart_lulc = function(){
-            var userID = sessionStorage.userId;
-        $.ajax({
-            type: 'POST',
-            url: "/apps/swat2/save_file_lulc/",
-            data: {"userID":userID},
-            success: function(result){
-          var newrow = '<tr><td>lulc_key</td><td>TXT</td><td>' + sessionStorage.streamID + '</td></tr>'
-                    $('#tBodySpatial').append(newrow);
-          var newrow = '<tr><td>lulc_legend</td><td>PNG</td><td>' + sessionStorage.streamID  + '</td></tr>'
-                    $('#tBodySpatial').append(newrow);
-
-            }
-        });
-    };
+           $.ajax({
+               type: 'POST',
+               url: "/apps/swat2/save_file_lulc/",
+               data: {"userID": userID},
+               success: function (result) {
+                   var newrow = '<tr><td>lulc_key</td><td>TXT</td><td>' + sessionStorage.streamID + '</td></tr>'
+                   $('#tBodySpatial').append(newrow);
+                   var newrow = '<tr><td>lulc_legend</td><td>PNG</td><td>' + sessionStorage.streamID + '</td></tr>'
+                   $('#tBodySpatial').append(newrow);
+                    $('#lulc-loading').addClass('hidden')
+                   $('#lulc_save_success').removeClass('hidden');
+                   setTimeout(function () {
+                       $('#lulc_save_success').addClass('hidden')
+                   }, 5000);
+               }
+           });
+       };
 
 
     soil_compute = function(){
