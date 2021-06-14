@@ -86,7 +86,11 @@ def timeseries(request):
         else:
             timeseries_dict = extract_daily_rch(watershed, watershed_id, start, end, parameters, streamID)
     elif file_type == 'sub':
-        timeseries_dict = extract_sub(watershed, watershed_id, start, end, parameters, streamID)
+        if monthOrDay == 'Monthly':
+            timeseries_dict = extract_sub_monthly(watershed, watershed_id, start, end, parameters, streamID)
+        else:
+            timeseries_dict = extract_sub_daily(watershed, watershed_id, start, end, parameters, streamID)
+
 
     # Return the json object back to main.js for timeseries plotting
     json_dict = JsonResponse(timeseries_dict)

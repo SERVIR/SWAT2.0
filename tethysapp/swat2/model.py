@@ -304,7 +304,51 @@ def extract_monthly_rch(watershed, watershed_id, start, end, parameters, reachid
     cur.close()
     return rchDict
 
-def extract_sub(watershed, watershed_id, start, end, parameters, subid):
+def extract_sub_monthly(watershed, watershed_id, start, end, parameters, subid):
+    dt_start = datetime.strptime(start, '%B %d, %Y').strftime('%Y-%m-%d')
+    dt_end = datetime.strptime(end, '%B %d, %Y').strftime('%Y-%m-%d')
+    daterange = pd.date_range(start, end, freq='MS')
+    sss=[d.strftime('%Y-%m-%d') for d in daterange]
+
+    daterange = daterange.union([daterange[-1]])
+    daterange_str = [d.strftime('%b %d, %Y') for d in daterange]
+    daterange_mil = [int(d.strftime('%s')) * 1000 for d in daterange]
+
+    subDict = {'Watershed': watershed,
+               'Dates': daterange_str,
+               'ReachID': subid,
+               'Parameters': parameters,
+               'Values': {},
+               'Names': [],
+               'Timestep': 'Monthly',
+               'FileType': 'sub'}
+
+    conn = psycopg2.connect(
+        "dbname={0} user={1} host={2} password={3}".format(cfg.db['name'], cfg.db['user'], cfg.db['host'],
+                                                           cfg.db['pass']))
+    cur = conn.cursor()
+
+    for x in range(0, len(parameters)):
+        param_name = sub_param_names[parameters[x]]
+        subDict['Names'].append(param_name)
+
+        sub_qr = """SELECT distinct val FROM output_sub WHERE watershed_id={0} AND sub_id={1} AND var_name='{2}' AND year_month_day in {3}; """.format(
+            watershed_id, subid, parameters[x], tuple(sss))
+        cur.execute(sub_qr)
+        data = cur.fetchall()
+
+        ts = []
+        i = 0
+        while i < len(data):
+            ts.append([daterange_mil[i], data[i][0]])
+            i += 1
+
+        subDict['Values'][x] = ts
+        subDict['Names'].append(param_name)
+    cur.close()
+    return subDict
+
+def extract_sub_daily(watershed, watershed_id, start, end, parameters, subid):
     dt_start = datetime.strptime(start, '%B %d, %Y').strftime('%Y-%m-%d')
     dt_end = datetime.strptime(end, '%B %d, %Y').strftime('%Y-%m-%d')
     daterange = pd.date_range(start, end, freq='1d')
@@ -373,7 +417,7 @@ def clip_raster(watershed, uniqueID, outletID, raster_type):
     input_tif = os.path.join(data_path, watershed, 'Land', raster_type + '.tif')
     output_tif = os.path.join(temp_workspace, uniqueID, watershed + '_upstream_'+ raster_type + '_' + outletID + '.tif')
     logging.info("clip raster before gdal")
-    subprocess.call('{0} --config GDALWARP_IGNORE_BAD_CUTLINE YES -cutline {1} -crop_to_cutline -dstalpha {2} {3}'.format(cfg.gdalwarp_path,input_json, input_tif, output_tif),shell=True)
+    subprocess.Popen('{0} --config GDALWARP_IGNORE_BAD_CUTLINE YES -cutline {1} -crop_to_cutline -dstalpha {2} {3}'.format(cfg.gdalwarp_path,input_json, input_tif, output_tif),shell=True).communicate() 
     logging.info("clip raster after gdal")
 
     storename = watershed + '_upstream_' + raster_type + '_' + outletID

@@ -180,6 +180,12 @@
                         <div id="sub_var_picker" class="var_picker">
                             {% gizmo sub_var_select %}
                         </div>
+                         <div class="subchartToggle">
+
+                            <label>
+                                <input id="sub_chart_toggle" type="checkbox" checked data-toggle="toggle" data-on="Monthly" data-off="Daily" data-onstyle="success" data-offstyle="danger">
+                            </label>
+                        </div>
                         <div id="sub_date_picker" class="date_picker">
                             <div class="input-group input-daterange">
                                 {% gizmo sub_start_pick %}
@@ -396,15 +402,39 @@
         </div>
         <div class="modal-body" class="form-group">
 
-            <label>Model</label><select class="form-control"  id="nex_model"><option>WCRP</option><option>CMIP5</option><option>IPSL-CM5A-MR</option><option>CM5A-MR</option></select>
+            <label>Model</label>
+            <select class="form-control"  id="nex_model">
+                <option>inmcm4</option>
+                <option>bcc-csm1-1</option>
+                <option>NorESM1-M</option>
+                <option>MRI-CGCM3</option>
+                <option>MPI-ESM-MR</option>
+                <option>MPI-ESM-LR</option>
+                <option>MIROC5</option>
+                <option>MIROC-ESM</option>
+                <option>MIROC-ESM-CHEM</option>
+                <option>IPSL-CM5A-MR</option>
+                <option>IPSL-CM5A-LR</option>
+                <option>GFDL-ESM2M</option>
+                <option>GFDL-ESM2G</option>
+                <option>GFDL-CM3</option>
+                <option>CanESM2</option>
+                <option>CSIRO-Mk3-6-0</option>
+                 <option>CNRM-CM5</option>
+                 <option>CESM1-BGC</option>
+                 <option>CCSM4</option>
+                 <option>BNU-ESM</option>
+                <option>ACCESS1-0</option>
+
+            </select>
             <label>Type</label><select class="form-control" id="nex_type"><option>pr</option><option>tas</option></select>
             <label>Slice</label><select class="form-control" id="nex_slice"><option>rcp45</option><option>rcp85</option><option>historical</option></select>
 
-            <label for="nex_from">From</label>
+            <label for="nex_from">Start Date</label>
             <input class="form-control" type="text" id="nex_from" name="from" data-date-start-view="decade">
 
 
-            <label  for="nex_to">To</label>
+            <label  for="nex_to">End Date</label>
                 <input class="form-control" type="text" id="nex_to" name="to" data-date-start-view="decade">
         </div>
         <div class="modal-footer">
@@ -453,9 +483,9 @@
                 <h4 class="modal-title">WELCOME</h4>
             </div>
             <div class="modal-body">
-                <div class="alert alert-danger" id="data-warning">
-                    <strong>Warning!</strong> The Lower Mekong simulated SWAT water quality data has not yet been validated and should not be used for decision support.
-                </div>
+<!--                <div class="alert alert-danger" id="data-warning">-->
+<!--                    <strong>Warning!</strong> The Lower Mekong simulated SWAT water quality data has not yet been validated and should not be used for decision support.-->
+<!--                </div>-->
                 <h5><strong>The SWAT Data Viewer is a web application for visualizing and sharing inputs/outputs from the Soil and Water Assessment Tool (SWAT). It is currently being developed by a team at NASA Goddard Space Flight Center as part of a NASA-SERVIR Applied Science grant in the Lower Mekong region.</strong></h5>
                 <br>
                 <h5>The following steps highlight the several functions of the SWAT Data Viewer web app</h5>

@@ -546,7 +546,7 @@ var closer = document.getElementById('popup-closer');
                                         var Name = stations[i].Name;
                                         var point_x = stations[i].point_x;
                                         var point_y = stations[i].point_y;
-                                        var URL = stations[i].URL === "" ? "Unavailable" : stations[i].URL;
+                                        var URL = stations[i].URL === "" ? "Unavailable" : '<a href="'+stations[i].URL+'" target="_blank">'+stations[i].URL+'</a>';
                                         content.innerHTML = '<table class="station_class"><tr><td>Station Name</td><td>' + station_name + '</td></tr><tr><td>Station Code</td><td>' + Station_code + '' +
                                             '</td></tr><tr><td>River</td><td>' + River + '</td></tr><tr><td>Lmb ID</td><td>' + Lmb_id + '</td></tr><tr><td>Point X</td><td>' + point_x + '</td></tr>' +
                                             '<tr><td>Point Y</td><td>' + point_y + '</td></tr><tr><td>URL</td><td>' + URL + '</td></tr></table>';
@@ -1773,10 +1773,14 @@ var img = document.createElement('img');
         var start = $('#na_start_pick').val()
         var end = $('#na_end_pick').val()
         var functions = [];
-        $('.chk:checked').each(function() {
-             functions.push( $( this ).val());
+        $('.chk:checked').each(function () {
+            functions.push($(this).val());
         });
-        if (watershed === undefined || start === 'Start Date' || end === 'End Date' || functions.length == 0) {
+        if ((watershed === undefined || start === 'Start Date' || end === 'End Date') && functions.includes("NEXgdpp") && functions.length> 1) {
+            alert('Please be sure you have selected start and end dates');
+        }  else if ($('#nex_from').val()=="" || $('#nex_to').val()=="") {
+            alert('Please be sure you have selected all the options for NEX-GDPP');
+        }else if (functions.length == 0) {
             alert('Please be sure you have selected start and end dates and at least 1 function')
         } else {
             $("#cont-modal").modal('show');
@@ -1962,17 +1966,22 @@ var img = document.createElement('img');
             get_time_series(watershed_id, watershed, start, end, parameters, streamID, fileType);
         })
 
-        $("#sub_compute").click(function(){
+        $("#sub_compute").click(function() {
             $('#view-sub-loading').removeClass('hidden')
             var watershed_id = sessionStorage.watershed_id
             var start = $('#sub_start_pick').val();
             var end = $('#sub_end_pick').val();
             var parameters = []
-            $('#sub_var_select option:selected').each(function() {
-                parameters.push( $( this ).val());
+            $('#sub_var_select option:selected').each(function () {
+                parameters.push($(this).val());
             });
             var streamID = sessionStorage.streamID
-            var fileType = 'sub'
+            var fileType = 'sub';
+            if ($(".subchartToggle .toggle").hasClass("off")) {
+                monthOrDay = 'Daily'
+            } else {
+                monthOrDay = 'Monthly'
+            }
             get_time_series(watershed_id, watershed, start, end, parameters, streamID, fileType);
         })
 
@@ -2015,6 +2024,9 @@ var img = document.createElement('img');
                  var slice = $('#nex_slice :selected').text();
                  var start=$('#nex_from').val();
                  var end=$('#nex_to').val();
+                 if(start==""||end==""){
+                     alert("Please select a start date and end date")
+                 }
                  nexgdpp.push(model);
                  nexgdpp.push(type);
                  nexgdpp.push(slice);
@@ -2046,11 +2058,11 @@ var img = document.createElement('img');
         $("#download_data").click(function(){
             $("#download-modal").modal('show');
         })
-$('#nex_gdpp').click(function(){
-    if($(this).is(':checked')){
-         $("#nexgdpp-modal").modal('show');
-    }
-});
+        $('#nex_gdpp').click(function(){
+            if($(this).is(':checked')){
+                 $("#nexgdpp-modal").modal('show');
+            }
+        });
 
 
 

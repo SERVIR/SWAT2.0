@@ -271,7 +271,7 @@ input[type=submit] {
   width: 100% !important;
 }
 
-.chartToggle{
+.chartToggle,.subchartToggle{
     display: inline;
 
     float: left;
