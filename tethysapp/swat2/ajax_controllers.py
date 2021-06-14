@@ -83,7 +83,6 @@ def timeseries(request):
         if monthOrDay == 'Monthly':
             #print({'Error': 'No monthly data available currently'})
             timeseries_dict = extract_monthly_rch(watershed,watershed_id, start, end, parameters, streamID)
-
         else:
             timeseries_dict = extract_daily_rch(watershed, watershed_id, start, end, parameters, streamID)
     elif file_type == 'sub':
@@ -127,7 +126,6 @@ def run_nasaaccess(request):
 
 def save_file(request):
     data_json = json.loads(request.body)
-
     file_dict = write_csv(data_json)
     json_dict = JsonResponse(file_dict)
     return json_dict

@@ -535,14 +535,12 @@ def write_csv(data):
 
     start = ''
     end = ''
-
     if timestep == 'Monthly':
-        start = datetime.strptime(dates[0], '%b %y').strftime('%m%Y')
-        end = datetime.strptime(dates[-1], '%b %y').strftime('%m%Y')
+        start = datetime.strptime(dates[0], '%b %d, %Y').strftime('%m%Y')
+        end = datetime.strptime(dates[-1], '%b %d, %Y').strftime('%m%Y')
     elif timestep == 'Daily':
         start = datetime.strptime(dates[0], '%b %d, %Y').strftime('%m%d%Y')
         end = datetime.strptime(dates[-1], '%b %d, %Y').strftime('%m%d%Y')
-
     file_name = watershed + '_' + file_type + streamID + '_' + param_str_low + '_' + start + 'to' + end
     file_name.replace('/','')
     file_dict = {'Parameters': param_str,
@@ -551,7 +549,6 @@ def write_csv(data):
                  'FileType': file_type,
                  'TimeStep': timestep,
                  'StreamID': streamID}
-
     csv_path = os.path.join(temp_workspace, unique_id, file_name + '.csv')
 
     fieldnames = []
@@ -567,7 +564,7 @@ def write_csv(data):
     for i in range(0, len(dates)):
         utc_list.append(values['0'][i][0]/1000)
         if timestep == 'Monthly':
-            date_list.append(datetime.strptime(dates[i], '%b %y').strftime('%-m/%Y'))
+            date_list.append(datetime.strptime(dates[i], '%b %d, %Y').strftime('%-m/%Y'))
         elif timestep == 'Daily':
             date_list.append(datetime.strptime(dates[i], '%b %d, %Y').strftime('%-m/%d/%Y'))
     d = OrderedDict()
