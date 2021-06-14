@@ -136,14 +136,18 @@ def save_file_lulc(request):
     if request.method == 'POST':
         uniqueID = request.POST['userID']
         path_to_file = os.path.join(data_path, 'lower_mekong/Land/lulc_key.txt')
+        path_to_file_legend = os.path.join(data_path, 'lower_mekong/Land/lulc_legend.png')
         copyfile(path_to_file, os.path.join(temp_workspace,uniqueID,"lulc_key.txt"))
+        copyfile(path_to_file_legend, os.path.join(temp_workspace, uniqueID, "lulc_legend.png"))
         json_dict = JsonResponse({"filename":"lulc_key.txt"})
         return json_dict
 def save_file_soil(request):
     if request.method == 'POST':
         uniqueID = request.POST['userID']
         path_to_file = os.path.join(data_path, 'lower_mekong/Land/soil_key.txt')
+        path_to_file_legend = os.path.join(data_path, 'lower_mekong/Land/soil_legend.png')
         copyfile(path_to_file, os.path.join(temp_workspace,uniqueID,"soil_key.txt"))
+        copyfile(path_to_file_legend, os.path.join(temp_workspace, uniqueID, "soil_legend.png"))
         json_dict = JsonResponse({"filename":"soil_key.txt"})
         return json_dict
 
