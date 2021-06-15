@@ -60,8 +60,8 @@ def clip_rasters(request):
     userId = request.POST.get('userId')
     outletID = request.POST.get('outletID')
     raster_type = request.POST.get('raster_type')
-    clip_raster(watershed, userId, outletID, raster_type)
-    json_dict = JsonResponse({'watershed': watershed, 'raster_type': raster_type})
+    val=clip_raster(watershed, userId, outletID, raster_type)
+    json_dict = JsonResponse({'watershed': watershed, 'raster_type': raster_type,'val':val})
     return(json_dict)
 
 def timeseries(request):

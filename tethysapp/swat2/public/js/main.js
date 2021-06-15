@@ -864,11 +864,11 @@ var closer = document.getElementById('popup-closer');
                 'raster_type': raster_type
             },
             success: function (data) {
-                if (data.raster_type == 'lulc') {
+                if (data.raster_type == 'lulc' && data.val == true) {
                     lulc_map.removeLayer(upstreamOverlaySubbasin)
                     // $('#clip_lulc').attr("disabled", true)
                     // $('#lulc_compute').attr("disabled", false)
-                        $('#clip_and_compute_lulc').attr("disabled",false);
+                    $('#clip_and_compute_lulc').attr("disabled", false);
                     var lulc_store = watershed + '_upstream_lulc_' + outletID
                     var lulc_store_id = gs_workspace + ':' + lulc_store
                     var style = watershed + '-' + data.raster_type
@@ -888,12 +888,13 @@ var closer = document.getElementById('popup-closer');
                     lulc_map.addLayer(upstreamOverlaySubbasin);
                     var newrow = '<tr>><td>lulc</td><td>TIFF</td><td>' + sessionStorage.streamID + '</td</tr>'
                     $('#tBodySpatial').append(newrow);
+                    lulc_compute("lulc");
                 }
-                if (data.raster_type == 'soil') {
+                if (data.raster_type == 'soil' && data.val == true) {
                     soil_map.removeLayer(upstreamOverlaySubbasin)
                     // $('#clip_soil').attr("disabled", true)
                     // $('#soil_compute').attr("disabled", false)
-                    $('#clip_and_compute_soil').attr("disabled",false);
+                    $('#clip_and_compute_soil').attr("disabled", false);
                     var soil_store = watershed + '_upstream_soil_' + outletID
                     var soil_store_id = gs_workspace + ':' + soil_store
                     var style = watershed + '-' + data.raster_type
@@ -914,7 +915,7 @@ var closer = document.getElementById('popup-closer');
                     soil_map.addLayer(upstreamOverlaySubbasin);
                     var newrow = '<tr>><td>soil</td><td>TIFF</td><td>' + sessionStorage.streamID + '</td</tr>'
                     $('#tBodySpatial').append(newrow);
-
+                    soil_compute("soil");
                 }
             }
         })
@@ -2042,16 +2043,16 @@ var img = document.createElement('img');
  $('#saveDataLulc').removeClass('hidden')
 
             clip_rasters('lulc');
-             var raster_type = 'lulc';
-            lulc_compute(raster_type);
+            // var raster_type = 'lulc';
+    //        lulc_compute(raster_type);
          //   $('#lulc-pie-loading').removeClass('hidden');
         });
 
         $('#clip_and_compute_soil').click(function(){
             $('#saveDataSoil').removeClass('hidden')
             clip_rasters('soil');
-               var raster_type = 'soil';
-            soil_compute(raster_type);
+               //var raster_type = 'soil';
+            //soil_compute(raster_type);
       //      $('#soil-pie-loading').removeClass('hidden');
         });
 

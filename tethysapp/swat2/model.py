@@ -17,7 +17,8 @@ import tethysapp.swat2.config as cfg
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
-
+import time
+from os import path
 import  psycopg2
 import logging
 LOG_FILENAME = "/home/tethys/subprocesses/model.log"
@@ -417,7 +418,8 @@ def clip_raster(watershed, uniqueID, outletID, raster_type):
     input_tif = os.path.join(data_path, watershed, 'Land', raster_type + '.tif')
     output_tif = os.path.join(temp_workspace, uniqueID, watershed + '_upstream_'+ raster_type + '_' + outletID + '.tif')
     logging.info("clip raster before gdal")
-    subprocess.check_output('{0} --config GDALWARP_IGNORE_BAD_CUTLINE YES -cutline {1} -crop_to_cutline -dstalpha {2} {3}'.format(cfg.gdalwarp_path,input_json, input_tif, output_tif),shell=True)
+    p=subprocess.Popen('{0} --config GDALWARP_IGNORE_BAD_CUTLINE YES -cutline {1} -crop_to_cutline -dstalpha {2} {3}'.format(cfg.gdalwarp_path,input_json, input_tif, output_tif),shell=True)
+    p.wait()
     logging.info("clip raster after gdal")
 
     storename = watershed + '_upstream_' + raster_type + '_' + outletID
@@ -444,6 +446,11 @@ def clip_raster(watershed, uniqueID, outletID, raster_type):
 
         requests.put(request_url, verify=False, headers=headers, data=data, auth=(user, password))
         logging.info("put into server")
+    if(path.exists(os.path.join(temp_workspace, uniqueID, watershed + '_upstream_'+ raster_type + '_' + outletID + '.tif'))):
+        return True
+    else:
+        return False
+
 
 
 def coverage_stats(watershed, watershed_id, unique_id, outletID, raster_type):
@@ -453,6 +460,7 @@ def coverage_stats(watershed, watershed_id, unique_id, outletID, raster_type):
     cur = conn.cursor()
     tif_path = temp_workspace + '/' + str(unique_id) + '/' + watershed + '_upstream_' + str(raster_type) + '_' + str(
         outletID) + '.tif'
+
     ds = gdal.Open(tif_path)  # open user-requested TIFF file using gdal
     band = ds.GetRasterBand(1)  # read the 1st raster band
     array = np.array(band.ReadAsArray())  # create an array of all values in the raster
