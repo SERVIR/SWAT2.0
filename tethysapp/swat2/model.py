@@ -226,8 +226,10 @@ def extract_daily_rch(watershed, watershed_id, start, end, parameters, reachid):
     dt_end = datetime.strptime(end, '%B %d, %Y').strftime('%Y-%m-%d')
     daterange = pd.date_range(start, end, freq='1d')
     daterange = daterange.union([daterange[-1]])
+    print(daterange)
     daterange_str = [d.strftime('%b %d, %Y') for d in daterange]
     daterange_mil = [int(d.strftime('%s')) * 1000 for d in daterange]
+
 
     rchDict = {'Watershed': watershed,
                'Dates': daterange_str,
@@ -246,7 +248,7 @@ def extract_daily_rch(watershed, watershed_id, start, end, parameters, reachid):
         param_name = rch_param_names[parameters[x]]
         rchDict['Names'].append(param_name)
 
-        rch_qr = """SELECT distinct val FROM output_rch WHERE watershed_id={0} AND reach_id={1} AND var_name='{2}' AND year_month_day BETWEEN '{3}' AND '{4}'; """.format(
+        rch_qr = """SELECT distinct val,year_month_day FROM output_rch WHERE watershed_id={0} AND reach_id={1} AND var_name='{2}' AND year_month_day BETWEEN '{3}' AND '{4}' order by year_month_day; """.format(
             watershed_id, reachid, parameters[x], dt_start, dt_end)
         cur.execute(rch_qr)
         data = cur.fetchall()
@@ -290,7 +292,7 @@ def extract_monthly_rch(watershed, watershed_id, start, end, parameters, reachid
         param_name = rch_param_names[parameters[x]]
         rchDict['Names'].append(param_name)
 
-        rch_qr = """SELECT distinct val FROM output_rch WHERE watershed_id={0} AND reach_id={1} AND var_name='{2}' AND year_month_day in {3}; """.format(
+        rch_qr = """SELECT distinct val,year_month_day FROM output_rch WHERE watershed_id={0} AND reach_id={1} AND var_name='{2}' AND year_month_day in {3} order by year_month_day; """.format(
             watershed_id, reachid, parameters[x], tuple(sss))
         cur.execute(rch_qr)
         data = cur.fetchall()
@@ -333,7 +335,7 @@ def extract_sub_monthly(watershed, watershed_id, start, end, parameters, subid):
         param_name = sub_param_names[parameters[x]]
         subDict['Names'].append(param_name)
 
-        sub_qr = """SELECT distinct val FROM output_sub WHERE watershed_id={0} AND sub_id={1} AND var_name='{2}' AND year_month_day in {3}; """.format(
+        sub_qr = """SELECT distinct val,year_month_day FROM output_sub WHERE watershed_id={0} AND sub_id={1} AND var_name='{2}' AND year_month_day in {3} order by year_month_day; """.format(
             watershed_id, subid, parameters[x], tuple(sss))
         cur.execute(sub_qr)
         data = cur.fetchall()
@@ -375,7 +377,7 @@ def extract_sub_daily(watershed, watershed_id, start, end, parameters, subid):
         param_name = sub_param_names[parameters[x]]
         subDict['Names'].append(param_name)
 
-        sub_qr = """SELECT val FROM output_sub WHERE watershed_id={0} AND sub_id={1} AND var_name='{2}' AND year_month_day BETWEEN '{3}' AND '{4}'; """.format(
+        sub_qr = """SELECT val,year_month_day FROM output_sub WHERE watershed_id={0} AND sub_id={1} AND var_name='{2}' AND year_month_day BETWEEN '{3}' AND '{4}' order by year_month_day; """.format(
             watershed_id, subid, parameters[x], dt_start, dt_end)
         cur.execute(sub_qr)
         data = cur.fetchall()
@@ -418,7 +420,7 @@ def clip_raster(watershed, uniqueID, outletID, raster_type):
     input_tif = os.path.join(data_path, watershed, 'Land', raster_type + '.tif')
     output_tif = os.path.join(temp_workspace, uniqueID, watershed + '_upstream_'+ raster_type + '_' + outletID + '.tif')
     logging.info("clip raster before gdal")
-    p=subprocess.Popen('{0} --config GDALWARP_IGNORE_BAD_CUTLINE YES -cutline {1} -crop_to_cutline -dstalpha {2} {3}'.format(cfg.gdalwarp_path,input_json, input_tif, output_tif),shell=True)
+    p=subprocess.Popen('{0} --config GDALWARP_IGNORE_BAD_CUTLINE YES -cutline {1} -crop_to_cutline -overwrite -dstalpha {2} {3}'.format(cfg.gdalwarp_path,input_json, input_tif, output_tif),shell=True)
     p.wait()
     logging.info("clip raster after gdal")
 
