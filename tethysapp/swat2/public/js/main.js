@@ -651,114 +651,125 @@ var closer = document.getElementById('popup-closer');
                 'id': userId
             },
             success: function (data) {
-                var upstreams = data.upstreams
-                var outletID = sessionStorage.streamID
-                sessionStorage.setItem('upstreams', upstreams)
-                var cql_filter
-                if (upstreams.length > 376) {
-                    cql_filter = 'Subbasin=' + streamID.toString();
-                } else {
-                    cql_filter = 'Subbasin=' + streamID.toString();
-                    for (var i = 1; i < upstreams.length; i++) {
-                        cql_filter += ' OR Subbasin=' + upstreams[i].toString();
+                if(data.error=="error") {
+                    console.log("eeeeeeeeeee")
+                alert('alert')
+                }else {
+                    var upstreams = data.upstreams
+                    var outletID = sessionStorage.streamID
+                    sessionStorage.setItem('upstreams', upstreams)
+                    var cql_filter
+                    if (upstreams.length > 376) {
+                        cql_filter = 'Subbasin=' + streamID.toString();
+                    } else {
+                        cql_filter = 'Subbasin=' + streamID.toString();
+                        for (var i = 1; i < upstreams.length; i++) {
+                            cql_filter += ' OR Subbasin=' + upstreams[i].toString();
+                        }
                     }
+                    var reach_url = geoserver_url + 'ows?service=wfs&version=2.0.0&request=getfeature&typename=' + reach_store_id + '&CQL_FILTER=Subbasin=' + streamID + '&outputFormat=application/json&srsname=EPSG:4326&,EPSG:4326'
+                    var upstream_reach_url = geoserver_url + 'ows?service=wfs&version=2.0.0&request=getfeature&typename=' + reach_store_id + '&CQL_FILTER=' + cql_filter + '&outputFormat=application/json&srsname=EPSG:4326&,EPSG:4326'
+                    var streamVectorSource = new ol.source.Vector({
+                        format: new ol.format.GeoJSON(),
+                        url: reach_url,
+                        strategy: ol.loadingstrategy.bbox
+                    });
+
+                    featureOverlayStream = new ol.layer.Vector({
+                        source: streamVectorSource,
+                        style: new ol.style.Style({
+                            stroke: new ol.style.Stroke({
+                                color: '#f44242',
+                                width: 3
+                            })
+                        })
+
+                    });
+
+                    var upstreamStreamVectorSource = new ol.source.Vector({
+                        format: new ol.format.GeoJSON(),
+                        url: upstream_reach_url,
+                        strategy: ol.loadingstrategy.bbox
+                    });
+
+                    upstreamOverlayStream = new ol.layer.Vector({
+                        source: upstreamStreamVectorSource,
+                        style: new ol.style.Style({
+                            stroke: new ol.style.Stroke({
+                                color: '#42c5f4',
+                                width: 2
+                            })
+                        })
+                    });
+
+                    rch_map.addLayer(upstreamOverlayStream);
+                    rch_map.addLayer(featureOverlayStream);
+
+
+                    var basin_url = geoserver_url + 'ows?service=wfs&version=2.0.0&request=getfeature&typename=' + basin_store_id + '&CQL_FILTER=Subbasin=' + streamID + '&outputFormat=application/json&srsname=EPSG:4326&,EPSG:4326'
+                    var upstream_basin_url = geoserver_url + 'ows?service=wfs&version=2.0.0&request=getfeature&typename=' + basin_store_id + '&CQL_FILTER=' + cql_filter + '&outputFormat=application/json&srsname=EPSG:4326&,EPSG:4326'
+                    var upstreamSubbasinVectorSource = new ol.source.Vector({
+                        format: new ol.format.GeoJSON(),
+                        url: upstream_basin_url,
+                        strategy: ol.loadingstrategy.bbox
+                    });
+
+                    var color = '#ffffff';
+                    color = ol.color.asArray(color);
+                    color = color.slice();
+                    color[3] = 0;
+
+                    upstreamOverlaySubbasin = new ol.layer.Vector({
+                        source: upstreamSubbasinVectorSource,
+                        style: new ol.style.Style({
+                            stroke: new ol.style.Stroke({
+                                color: '#ffffff',
+                                width: 2
+                            }),
+                            fill: new ol.style.Fill({
+                                color: color
+                            })
+                        })
+                    });
+
+                    var subbasinVectorSource = new ol.source.Vector({
+                        format: new ol.format.GeoJSON(),
+                        url: basin_url,
+                        strategy: ol.loadingstrategy.bbox
+                    });
+
+                    var color = '#ffffff';
+                    color = ol.color.asArray(color);
+                    color = color.slice();
+                    color[3] = .5;
+
+                    featureOverlaySubbasin = new ol.layer.Vector({
+                        source: subbasinVectorSource,
+                        style: new ol.style.Style({
+                            stroke: new ol.style.Stroke({
+                                color: '#c10000',
+                                width: 3
+                            }),
+                            fill: new ol.style.Fill({
+                                color: color
+                            })
+                        })
+                    });
+                    sub_map.addLayer(upstreamOverlaySubbasin);
+                    sub_map.addLayer(featureOverlaySubbasin);
+                    soil_map.addLayer(upstreamOverlaySubbasin);
+                    lulc_map.addLayer(upstreamOverlaySubbasin);
+
+                    save_json(upstream_basin_url, upstream_reach_url, data);
+
+                    nasaaccess_map.addLayer(upstreamOverlaySubbasin);
+
                 }
-                var reach_url = geoserver_url + 'ows?service=wfs&version=2.0.0&request=getfeature&typename=' + reach_store_id + '&CQL_FILTER=Subbasin=' + streamID + '&outputFormat=application/json&srsname=EPSG:4326&,EPSG:4326'
-                var upstream_reach_url = geoserver_url + 'ows?service=wfs&version=2.0.0&request=getfeature&typename=' + reach_store_id + '&CQL_FILTER=' + cql_filter + '&outputFormat=application/json&srsname=EPSG:4326&,EPSG:4326'
-                var streamVectorSource = new ol.source.Vector({
-                    format: new ol.format.GeoJSON(),
-                    url: reach_url,
-                    strategy: ol.loadingstrategy.bbox
-                });
-
-                featureOverlayStream = new ol.layer.Vector({
-                    source: streamVectorSource,
-                    style: new ol.style.Style({
-                        stroke: new ol.style.Stroke({
-                            color: '#f44242',
-                            width: 3
-                        })
-                    })
-                });
-
-                var upstreamStreamVectorSource = new ol.source.Vector({
-                    format: new ol.format.GeoJSON(),
-                    url: upstream_reach_url,
-                    strategy: ol.loadingstrategy.bbox
-                });
-
-                upstreamOverlayStream = new ol.layer.Vector({
-                    source: upstreamStreamVectorSource,
-                    style: new ol.style.Style({
-                        stroke: new ol.style.Stroke({
-                            color: '#42c5f4',
-                            width: 2
-                        })
-                    })
-                });
-
-                rch_map.addLayer(upstreamOverlayStream);
-                rch_map.addLayer(featureOverlayStream);
-
-
-                var basin_url = geoserver_url + 'ows?service=wfs&version=2.0.0&request=getfeature&typename=' + basin_store_id + '&CQL_FILTER=Subbasin=' + streamID + '&outputFormat=application/json&srsname=EPSG:4326&,EPSG:4326'
-                var upstream_basin_url = geoserver_url + 'ows?service=wfs&version=2.0.0&request=getfeature&typename=' + basin_store_id + '&CQL_FILTER=' + cql_filter + '&outputFormat=application/json&srsname=EPSG:4326&,EPSG:4326'
-                var upstreamSubbasinVectorSource = new ol.source.Vector({
-                    format: new ol.format.GeoJSON(),
-                    url: upstream_basin_url,
-                    strategy: ol.loadingstrategy.bbox
-                });
-
-                var color = '#ffffff';
-                color = ol.color.asArray(color);
-                color = color.slice();
-                color[3] = 0;
-
-                upstreamOverlaySubbasin = new ol.layer.Vector({
-                    source: upstreamSubbasinVectorSource,
-                    style: new ol.style.Style({
-                        stroke: new ol.style.Stroke({
-                            color: '#ffffff',
-                            width: 2
-                        }),
-                        fill: new ol.style.Fill({
-                            color: color
-                        })
-                    })
-                });
-
-                var subbasinVectorSource = new ol.source.Vector({
-                    format: new ol.format.GeoJSON(),
-                    url: basin_url,
-                    strategy: ol.loadingstrategy.bbox
-                });
-
-                var color = '#ffffff';
-                color = ol.color.asArray(color);
-                color = color.slice();
-                color[3] = .5;
-
-                featureOverlaySubbasin = new ol.layer.Vector({
-                    source: subbasinVectorSource,
-                    style: new ol.style.Style({
-                        stroke: new ol.style.Stroke({
-                            color: '#c10000',
-                            width: 3
-                        }),
-                        fill: new ol.style.Fill({
-                            color: color
-                        })
-                    })
-                });
-                sub_map.addLayer(upstreamOverlaySubbasin);
-                sub_map.addLayer(featureOverlaySubbasin);
-                soil_map.addLayer(upstreamOverlaySubbasin);
-                lulc_map.addLayer(upstreamOverlaySubbasin);
-
-                save_json(upstream_basin_url, upstream_reach_url, data);
-
-                nasaaccess_map.addLayer(upstreamOverlaySubbasin);
-            }
+            },
+            error:
+            function (request, status, error) {
+        alert(request.responseText);
+    }
         });
     }
 
@@ -774,32 +785,36 @@ var closer = document.getElementById('popup-closer');
                 url: "/apps/swat2/save_json/",
                 data: JSON.stringify(upstreamJson),
                 success: function (result) {
-                    var bbox = result.bbox
-                    var srs = result.srs
-                    var new_extent = ol.proj.transformExtent(bbox, srs, 'EPSG:4326');
-                    sessionStorage.setItem('streamExtent', new_extent)
-                    var center = ol.extent.getCenter(new_extent)
-                    var view = new ol.View({
-                        center: center,
-                        projection: 'EPSG:4326',
-                        extent: new_extent,
-                        zoom: 8
-                    });
+                    if (result.error == 'error') {
+                        alert("Please click on a watershed.")
+                    } else {
+                        var bbox = result.bbox
+                        var srs = result.srs
+                        var new_extent = ol.proj.transformExtent(bbox, srs, 'EPSG:4326');
+                        sessionStorage.setItem('streamExtent', new_extent)
+                        var center = ol.extent.getCenter(new_extent)
+                        var view = new ol.View({
+                            center: center,
+                            projection: 'EPSG:4326',
+                            extent: new_extent,
+                            zoom: 8
+                        });
 
-                    rch_map.updateSize();
-                    rch_map.getView().fit(sessionStorage.streamExtent.split(',').map(Number), rch_map.getSize());
-                    sub_map.updateSize();
-                    sub_map.getView().fit(sessionStorage.streamExtent.split(',').map(Number), sub_map.getSize());
-                    lulc_map.updateSize();
-                    lulc_map.getView().fit(sessionStorage.streamExtent.split(',').map(Number), lulc_map.getSize());
-                    soil_map.updateSize();
-                    soil_map.getView().fit(sessionStorage.streamExtent.split(',').map(Number), soil_map.getSize());
-                    nasaaccess_map.updateSize();
-                    nasaaccess_map.getView().fit(sessionStorage.streamExtent.split(',').map(Number), nasaaccess_map.getSize());
+                        rch_map.updateSize();
+                        rch_map.getView().fit(sessionStorage.streamExtent.split(',').map(Number), rch_map.getSize());
+                        sub_map.updateSize();
+                        sub_map.getView().fit(sessionStorage.streamExtent.split(',').map(Number), sub_map.getSize());
+                        lulc_map.updateSize();
+                        lulc_map.getView().fit(sessionStorage.streamExtent.split(',').map(Number), lulc_map.getSize());
+                        soil_map.updateSize();
+                        soil_map.getView().fit(sessionStorage.streamExtent.split(',').map(Number), soil_map.getSize());
+                        nasaaccess_map.updateSize();
+                        nasaaccess_map.getView().fit(sessionStorage.streamExtent.split(',').map(Number), nasaaccess_map.getSize());
 
 
-                    var newrow = '<tr><td>reach_upstream</td><td>JSON</td><td>' + sessionStorage.streamID + '</td></tr>'
-                    $('#tBodySpatial').append(newrow);
+                        var newrow = '<tr><td>reach_upstream</td><td>JSON</td><td>' + sessionStorage.streamID + '</td></tr>'
+                        $('#tBodySpatial').append(newrow);
+                    }
                 }
             })
         })
@@ -864,7 +879,7 @@ var closer = document.getElementById('popup-closer');
                 'raster_type': raster_type
             },
             success: function (data) {
-                if (data.raster_type == 'lulc' && data.val == true) {
+                if (data.raster_type == 'lulc') {
                     lulc_map.removeLayer(upstreamOverlaySubbasin)
                     // $('#clip_lulc').attr("disabled", true)
                     // $('#lulc_compute').attr("disabled", false)
@@ -890,7 +905,7 @@ var closer = document.getElementById('popup-closer');
                     $('#tBodySpatial').append(newrow);
                     lulc_compute("lulc");
                 }
-                if (data.raster_type == 'soil' && data.val == true) {
+                if (data.raster_type == 'soil') {
                     soil_map.removeLayer(upstreamOverlaySubbasin)
                     // $('#clip_soil').attr("disabled", true)
                     // $('#soil_compute').attr("disabled", false)

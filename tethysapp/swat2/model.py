@@ -226,7 +226,6 @@ def extract_daily_rch(watershed, watershed_id, start, end, parameters, reachid):
     dt_end = datetime.strptime(end, '%B %d, %Y').strftime('%Y-%m-%d')
     daterange = pd.date_range(start, end, freq='1d')
     daterange = daterange.union([daterange[-1]])
-    print(daterange)
     daterange_str = [d.strftime('%b %d, %Y') for d in daterange]
     daterange_mil = [int(d.strftime('%s')) * 1000 for d in daterange]
 
@@ -409,8 +408,9 @@ def get_upstreams(watershed_id, streamID):
         cur.execute(upstream_qr)
         records = cur.fetchall()
         for stream in records:
-            temp_upstreams.append(stream[0])
-            upstreams.append(stream[0])
+            if stream[0] not in upstreams:
+                temp_upstreams.append(stream[0])
+                upstreams.append(stream[0])
         temp_upstreams.remove(reach)
     return upstreams
 
@@ -420,7 +420,7 @@ def clip_raster(watershed, uniqueID, outletID, raster_type):
     input_tif = os.path.join(data_path, watershed, 'Land', raster_type + '.tif')
     output_tif = os.path.join(temp_workspace, uniqueID, watershed + '_upstream_'+ raster_type + '_' + outletID + '.tif')
     logging.info("clip raster before gdal")
-    p=subprocess.Popen('{0} --config GDALWARP_IGNORE_BAD_CUTLINE YES -cutline {1} -crop_to_cutline -overwrite -dstalpha {2} {3}'.format(cfg.gdalwarp_path,input_json, input_tif, output_tif),shell=True)
+    p=subprocess.Popen('{0} --config GDALWARP_IGNORE_BAD_CUTLINE YES -cutline {1} -crop_to_cutline -dstalpha {2} {3}'.format(cfg.gdalwarp_path,input_json, input_tif, output_tif),shell=True)
     p.wait()
     logging.info("clip raster after gdal")
 
@@ -432,13 +432,15 @@ def clip_raster(watershed, uniqueID, outletID, raster_type):
     password = cfg.geoserver['password']
     logging.info("before reading tif")
 
+
     data = open(output_tif, 'rb').read()
+
     logging.info("after reading tif")
 
     geoserver_engine = get_spatial_dataset_engine(name='SCO')
     logging.info("after geoserver engine")
 
-    response = geoserver_engine.get_layer(storename, debug=True)
+    response = geoserver_engine.get_layer(storename, debug=False)
     logging.info("after reading geoserver layer")
 
     if response['success'] == False:
@@ -448,22 +450,19 @@ def clip_raster(watershed, uniqueID, outletID, raster_type):
 
         requests.put(request_url, verify=False, headers=headers, data=data, auth=(user, password))
         logging.info("put into server")
-    if(path.exists(os.path.join(temp_workspace, uniqueID, watershed + '_upstream_'+ raster_type + '_' + outletID + '.tif'))):
-        return True
-    else:
-        return False
 
 
 
 def coverage_stats(watershed, watershed_id, unique_id, outletID, raster_type):
+    time.sleep(3)
     conn = psycopg2.connect(
         "dbname={0} user={1} host={2} password={3}".format(cfg.db['name'], cfg.db['user'], cfg.db['host'],
                                                            cfg.db['pass']))
     cur = conn.cursor()
     tif_path = temp_workspace + '/' + str(unique_id) + '/' + watershed + '_upstream_' + str(raster_type) + '_' + str(
         outletID) + '.tif'
-
     ds = gdal.Open(tif_path)  # open user-requested TIFF file using gdal
+
     band = ds.GetRasterBand(1)  # read the 1st raster band
     array = np.array(band.ReadAsArray())  # create an array of all values in the raster
     size = array.size  # get the size (pixel count) of the raster

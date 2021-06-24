@@ -21,20 +21,21 @@ def get_upstream(request):
     """
     Controller to get list of all upstream reach ids and pass it to front end
     """
-    watershed = request.POST.get('watershed')
-    watershed_id = request.POST.get('watershed_id')
-    streamID = request.POST.get('streamID')
-    # print('************')
-    # print(streamID)
-    unique_id = request.POST.get('id')
-    unique_path = os.path.join(temp_workspace, unique_id)
-    if not os.path.exists(unique_path):
-        os.makedirs(unique_path)
-        os.chmod(unique_path, 0o777)
+    try:
+        watershed = request.POST.get('watershed')
+        watershed_id = request.POST.get('watershed_id')
+        streamID = request.POST.get('streamID')
+        unique_id = request.POST.get('id')
+        unique_path = os.path.join(temp_workspace, unique_id)
+        if not os.path.exists(unique_path):
+            os.makedirs(unique_path)
+            os.chmod(unique_path, 0o777)
 
-    upstreams = get_upstreams(watershed_id, streamID)
+        upstreams = get_upstreams(watershed_id, streamID)
 
-    json_dict = JsonResponse({'watershed': watershed, 'streamID': streamID, 'upstreams': upstreams})
+        json_dict = JsonResponse({'watershed': watershed, 'streamID': streamID, 'upstreams': upstreams,'error':''})
+    except:
+        json_dict = JsonResponse({'error':'error'})
     return json_dict
 
 def save_json(request):
@@ -47,12 +48,15 @@ def save_json(request):
     unique_path = os.path.join(temp_workspace, unique_id)
     outletID = upstream_json['outletID']
     feature_type = upstream_json['featureType']
-    with open(unique_path + '/' + feature_type + '_upstream_' + outletID + '.json', 'w') as outfile:
-        json.dump(upstream_json, outfile)
-    bbox = upstream_json['bbox']
-    srs = 'EPSG:'
-    srs += upstream_json['crs']['properties']['name'].split(':')[-1]
-    json_dict = JsonResponse({'id': unique_id, 'bbox': bbox, 'srs': srs})
+    try:
+        with open(unique_path + '/' + feature_type + '_upstream_' + outletID + '.json', 'w') as outfile:
+            json.dump(upstream_json, outfile)
+        bbox = upstream_json['bbox']
+        srs = 'EPSG:'
+        srs += upstream_json['crs']['properties']['name'].split(':')[-1]
+        json_dict = JsonResponse({'id': unique_id, 'bbox': bbox, 'srs': srs,'error':''})
+    except:
+        json_dict = JsonResponse({'error': 'error'})
     return json_dict
 
 def clip_rasters(request):
@@ -60,8 +64,8 @@ def clip_rasters(request):
     userId = request.POST.get('userId')
     outletID = request.POST.get('outletID')
     raster_type = request.POST.get('raster_type')
-    val=clip_raster(watershed, userId, outletID, raster_type)
-    json_dict = JsonResponse({'watershed': watershed, 'raster_type': raster_type,'val':val})
+    clip_raster(watershed, userId, outletID, raster_type)
+    json_dict = JsonResponse({'watershed': watershed, 'raster_type': raster_type})
     return(json_dict)
 
 def timeseries(request):
