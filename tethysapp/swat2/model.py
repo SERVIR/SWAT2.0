@@ -454,7 +454,6 @@ def clip_raster(watershed, uniqueID, outletID, raster_type):
 
 
 def coverage_stats(watershed, watershed_id, unique_id, outletID, raster_type):
-    time.sleep(3)
     conn = psycopg2.connect(
         "dbname={0} user={1} host={2} password={3}".format(cfg.db['name'], cfg.db['user'], cfg.db['host'],
                                                            cfg.db['pass']))
