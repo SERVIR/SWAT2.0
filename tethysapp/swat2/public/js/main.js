@@ -487,10 +487,7 @@ var LIBRARY_OBJECT = (function() {
 
 
         map.on("singleclick", function (evt) {
-                var container = document.getElementById('popup');
-var content = document.getElementById('popup-content');
-var closer = document.getElementById('popup-closer');
- container.style.display="none";
+
 
             if (map.getTargetElement().style.cursor == "pointer") {
 
@@ -499,65 +496,68 @@ var closer = document.getElementById('popup-closer');
                 }
 
                 reset_all();
-                var view = map.getView();
-                var viewResolution = view.getResolution();
-                if (($(".watershedToggle .toggle").hasClass("off"))) {
-
-                    var popup = new ol.Overlay({
-                        element: document.getElementById('popup')
-                    });
-                    map.addOverlay(popup);
-                    popup.setPosition(evt.coordinate);
-
-
-                    closer.onclick = function () {
-                        popup.setPosition(undefined);
-                        closer.blur();
-                        return false;
-                    };
-
-
-                    var station_url = stations_layer.getSource().getGetFeatureInfoUrl(evt.coordinate, viewResolution, view.getProjection(), {'INFO_FORMAT': 'application/json'}); //Get the wms url for the clicked point
-                    $.ajax({
-                        type: "GET",
-                        url: station_url,
-                        dataType: 'json',
-                        success: function (result) {
-                            if (parseFloat(result["features"].length < 1)) {
-                                $('#error').html('<p class="alert alert-danger" style="text-align: center"><strong>An unknown error occurred while retrieving the data. Please try again</strong></p>');
-                                $('#error').removeClass('hidden');
-
-                                setTimeout(function () {
-                                    $('#error').addClass('hidden')
-                                }, 5000);
-                            }
-                            if(result["features"][0]) {
-                                var station_name = result["features"][0]["properties"]["Name"];
-                                //         var station_details = getStationDetails(station_name);
-                                var i = 0;
-
-                                for (i = 0; i < stations.length; i++) {
-                                    if (stations[i].Name === station_name) {
-                                        container.style.display = "block";
-                                        //return stations[i];
-                                        var Station_code = stations[i].Station_code;
-                                        var River = stations[i].River;
-                                        var Lmb_id = stations[i].Lmb_id;
-                                        var Name = stations[i].Name;
-                                        var point_x = stations[i].point_x;
-                                        var point_y = stations[i].point_y;
-                                        var URL = stations[i].URL === "" ? "Unavailable" : '<a href="'+stations[i].URL+'" target="_blank">'+stations[i].URL+'</a>';
-                                        content.innerHTML = '<table class="station_class"><tr><td>Station Name</td><td>' + station_name + '</td></tr><tr><td>Station Code</td><td>' + Station_code + '' +
-                                            '</td></tr><tr><td>River</td><td>' + River + '</td></tr><tr><td>Lmb ID</td><td>' + Lmb_id + '</td></tr><tr><td>Point X</td><td>' + point_x + '</td></tr>' +
-                                            '<tr><td>Point Y</td><td>' + point_y + '</td></tr><tr><td>URL</td><td>' + URL + '</td></tr></table>';
-                                    }
-                                }
-                            }
-                        }
-
-                    });
-                } else {
-                    container.style.display = "none";
+//                       var container = document.getElementById('popup');
+// var content = document.getElementById('popup-content');
+// var closer = document.getElementById('popup-closer');
+//  container.style.display="none";
+//                 var view = map.getView();
+//                 var viewResolution = view.getResolution();
+//                 if (($(".watershedToggle .toggle").hasClass("off"))) {
+//
+//                     var popup = new ol.Overlay({
+//                         element: document.getElementById('popup')
+//                     });
+//                     map.addOverlay(popup);
+//                     popup.setPosition(evt.coordinate);
+//
+//
+//                     closer.onclick = function () {
+//                         popup.setPosition(undefined);
+//                         closer.blur();
+//                         return false;
+//                     };
+//
+//
+//                     var station_url = stations_layer.getSource().getGetFeatureInfoUrl(evt.coordinate, viewResolution, view.getProjection(), {'INFO_FORMAT': 'application/json'}); //Get the wms url for the clicked point
+//                     $.ajax({
+//                         type: "GET",
+//                         url: station_url,
+//                         dataType: 'json',
+//                         success: function (result) {
+//                             if (parseFloat(result["features"].length < 1)) {
+//                                 $('#error').html('<p class="alert alert-danger" style="text-align: center"><strong>An unknown error occurred while retrieving the data. Please try again</strong></p>');
+//                                 $('#error').removeClass('hidden');
+//
+//                                 setTimeout(function () {
+//                                     $('#error').addClass('hidden')
+//                                 }, 5000);
+//                             }
+//                             if(result["features"][0]) {
+//                                 var station_name = result["features"][0]["properties"]["Name"];
+//                                 //         var station_details = getStationDetails(station_name);
+//                                 var i = 0;
+//
+//                                 for (i = 0; i < stations.length; i++) {
+//                                     if (stations[i].Name === station_name) {
+//                                         container.style.display = "block";
+//                                         //return stations[i];
+//                                         var Station_code = stations[i].Station_code;
+//                                         var River = stations[i].River;
+//                                         var Lmb_id = stations[i].Lmb_id;
+//                                         var Name = stations[i].Name;
+//                                         var point_x = stations[i].point_x;
+//                                         var point_y = stations[i].point_y;
+//                                         var URL = stations[i].URL === "" ? "Unavailable" : '<a href="'+stations[i].URL+'" target="_blank">'+stations[i].URL+'</a>';
+//                                         content.innerHTML = '<table class="station_class"><tr><td>Station Name</td><td>' + station_name + '</td></tr><tr><td>Station Code</td><td>' + Station_code + '' +
+//                                             '</td></tr><tr><td>River</td><td>' + River + '</td></tr><tr><td>Lmb ID</td><td>' + Lmb_id + '</td></tr><tr><td>Point X</td><td>' + point_x + '</td></tr>' +
+//                                             '<tr><td>Point Y</td><td>' + point_y + '</td></tr><tr><td>URL</td><td>' + URL + '</td></tr></table>';
+//                                     }
+//                                 }
+//                             }
+//                         }
+//
+//                     });
+                //} else {
                     var store = $('#watershed_select option:selected').val().split('|')[1]
                     var reach_store_id = gs_workspace + ':' + store + '-reach'
                     var basin_store_id = gs_workspace + ':' + store + '-subbasin'
@@ -613,10 +613,10 @@ var closer = document.getElementById('popup-closer');
                                     $('#soil_link').removeClass('active');
                                     $('#nasaaccess_link').removeClass('active');
                                     $('#datacart_link').removeClass('active');
-                                    $("#data-modal").modal('show');
+                                    // $("#data-modal").modal('show');
                                     $("#data-modal-btn").removeClass('hidden');
 
-                                    get_upstream(reach_store_id, basin_store_id, watershed, watershed_id, streamID, sessionStorage.userId);
+                                    get_upstream(reach_store_id, basin_store_id, watershed, watershed_id, streamID, sessionStorage.userId,clickCoord);
 
                                 }
                             });
@@ -625,7 +625,7 @@ var closer = document.getElementById('popup-closer');
                         alert("Please click on a watershed.")
 
                     }
-                }
+             //   }
             }
         });
 
@@ -644,7 +644,7 @@ var closer = document.getElementById('popup-closer');
         });
     }
 
-    get_upstream = function (reach_store_id, basin_store_id, watershed, watershed_id, streamID, userId) {
+    get_upstream = function (reach_store_id, basin_store_id, watershed, watershed_id, streamID, userId,clickCoord) {
         $.ajax({
             type: "POST",
             url: '/apps/swat2/get_upstream/',
@@ -655,9 +655,74 @@ var closer = document.getElementById('popup-closer');
                 'id': userId
             },
             success: function (data) {
+                    var container = document.getElementById('popup');
+                    var content = document.getElementById('popup-content');
+                    var closer = document.getElementById('popup-closer');
+                    container.style.display = "none";
                 if(data.error=="error") {
-                    alert('Please turn off watershed layer to see the station details OR be sure you click on watersheds for the charts.')
-                }else {
+                    $("#data-modal").modal('hide');
+
+                    var view = map.getView();
+                    var viewResolution = view.getResolution();
+
+                    var popup = new ol.Overlay({
+                        element: document.getElementById('popup')
+                    });
+                    map.addOverlay(popup);
+                    popup.setPosition(clickCoord);
+
+
+                    closer.onclick = function () {
+                        popup.setPosition(undefined);
+                        closer.blur();
+                        return false;
+                    };
+
+
+                    var station_url = stations_layer.getSource().getGetFeatureInfoUrl(clickCoord, viewResolution, view.getProjection(), {'INFO_FORMAT': 'application/json'}); //Get the wms url for the clicked point
+                    $.ajax({
+                        type: "GET",
+                        url: station_url,
+                        dataType: 'json',
+                        success: function (result) {
+                            if (parseFloat(result["features"].length < 1)) {
+                                $('#error').html('<p class="alert alert-danger" style="text-align: center"><strong>An unknown error occurred while retrieving the data. Please try again</strong></p>');
+                                $('#error').removeClass('hidden');
+
+                                setTimeout(function () {
+                                    $('#error').addClass('hidden')
+                                }, 5000);
+                            }
+                            if (result["features"][0]) {
+                                var station_name = result["features"][0]["properties"]["Name"];
+                                //         var station_details = getStationDetails(station_name);
+                                var i = 0;
+
+                                for (i = 0; i < stations.length; i++) {
+                                    if (stations[i].Name === station_name) {
+                                        container.style.display = "block";
+                                        //return stations[i];
+                                        var Station_code = stations[i].Station_code;
+                                        var River = stations[i].River;
+                                        var Lmb_id = stations[i].Lmb_id;
+                                        var Name = stations[i].Name;
+                                        var point_x = stations[i].point_x;
+                                        var point_y = stations[i].point_y;
+                                        var URL = stations[i].URL === "" ? "Unavailable" : '<a href="' + stations[i].URL + '" target="_blank">' + stations[i].URL + '</a>';
+                                        content.innerHTML = '<table class="station_class"><tr><td>Station Name</td><td>' + station_name + '</td></tr><tr><td>Station Code</td><td>' + Station_code + '' +
+                                            '</td></tr><tr><td>River</td><td>' + River + '</td></tr><tr><td>Lmb ID</td><td>' + Lmb_id + '</td></tr><tr><td>Point X</td><td>' + point_x + '</td></tr>' +
+                                            '<tr><td>Point Y</td><td>' + point_y + '</td></tr><tr><td>URL</td><td>' + URL + '</td></tr></table>';
+                                    }
+                                }
+                            }
+                        }
+
+                    });
+                }
+                else {
+                                        container.style.display = "none";
+
+                    $("#data-modal").modal('show');
                     var upstreams = data.upstreams
                     var outletID = sessionStorage.streamID
                     sessionStorage.setItem('upstreams', upstreams)
@@ -1028,7 +1093,7 @@ var closer = document.getElementById('popup-closer');
 //      Set the wms source to the url, workspace, and store for the streams of the selected watershed
         wms_source = new ol.source.ImageWMS({
             url: geoserver_url,
-            params: {'LAYERS': store_id, 'STYLES': 'point'},
+            params: {'LAYERS': store_id},
             serverType: 'geoserver',
             crossOrigin: 'Anonymous'
         });
