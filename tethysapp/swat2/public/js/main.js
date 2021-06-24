@@ -566,60 +566,64 @@ var closer = document.getElementById('popup-closer');
                     var clickCoord = evt.coordinate;
                     var view = map.getView();
                     var viewResolution = view.getResolution();
+                    try {
+                        var wms_url = current_layer.getSource().getGetFeatureInfoUrl(evt.coordinate, viewResolution, view.getProjection(), {'INFO_FORMAT': 'application/json'}); //Get the wms url for the clicked point
+                        if (wms_url) {
 
-                    var wms_url = current_layer.getSource().getGetFeatureInfoUrl(evt.coordinate, viewResolution, view.getProjection(), {'INFO_FORMAT': 'application/json'}); //Get the wms url for the clicked point
-                    if (wms_url) {
+                            //Retrieving the details for clicked point via the url
+                            $.ajax({
+                                type: "GET",
+                                url: wms_url,
+                                dataType: 'json',
+                                success: function (result) {
+                                    if (parseFloat(result["features"].length < 1)) {
+                                        $('#error').html('<p class="alert alert-danger" style="text-align: center"><strong>An unknown error occurred while retrieving the data. Please try again</strong></p>');
+                                        $('#error').removeClass('hidden');
 
-                        //Retrieving the details for clicked point via the url
-                        $.ajax({
-                            type: "GET",
-                            url: wms_url,
-                            dataType: 'json',
-                            success: function (result) {
-                                if (parseFloat(result["features"].length < 1)) {
-                                    $('#error').html('<p class="alert alert-danger" style="text-align: center"><strong>An unknown error occurred while retrieving the data. Please try again</strong></p>');
-                                    $('#error').removeClass('hidden');
+                                        setTimeout(function () {
+                                            $('#error').addClass('hidden')
+                                        }, 5000);
+                                    }
+                                    var streamID = parseFloat(result["features"][0]["properties"]["Subbasin"]);
+                                    sessionStorage.setItem('streamID', streamID)
+                                    var watershed = $('#watershed_select option:selected').val().split('|')[1]
+                                    sessionStorage.setItem('watershed', watershed)
+                                    var watershed_id = $('#watershed_select option:selected').val().split('|')[0]
+                                    sessionStorage.setItem('watershed_id', watershed_id)
+                                    $('#rch_tab').addClass('active');
+                                    $('#sub_tab').removeClass('active');
+                                    $('#lulc_tab').removeClass('active');
+                                    if (sessionStorage.lulc_avail === 'Yes') {
+                                        // $('#clip_lulc').attr('disabled', false)
+                                        $('#clip_and_compute_lulc').attr('disabled', false)
 
-                                    setTimeout(function () {
-                                        $('#error').addClass('hidden')
-                                    }, 5000);
+                                        // $('#lulc_compute').attr('disabled', true)
+                                    }
+                                    $('#soil_tab').removeClass('active');
+                                    if (sessionStorage.soil_avail === 'Yes') {
+                                        // $('#clip_soil').attr('disabled', false)
+                                        // $('#soil_compute').attr('disabled', true)
+                                        $('#clip_and_compute_soil').attr('disabled', false)
+                                    }
+                                    $('#nasaaccess_tab').removeClass('active');
+                                    $('#datacart_tab').removeClass('active');
+                                    $('#rch_link').addClass('active');
+                                    $('#sub_link').removeClass('active');
+                                    $('#lulc_link').removeClass('active');
+                                    $('#soil_link').removeClass('active');
+                                    $('#nasaaccess_link').removeClass('active');
+                                    $('#datacart_link').removeClass('active');
+                                    $("#data-modal").modal('show');
+                                    $("#data-modal-btn").removeClass('hidden');
+
+                                    get_upstream(reach_store_id, basin_store_id, watershed, watershed_id, streamID, sessionStorage.userId);
+
                                 }
-                                var streamID = parseFloat(result["features"][0]["properties"]["Subbasin"]);
-                                sessionStorage.setItem('streamID', streamID)
-                                var watershed = $('#watershed_select option:selected').val().split('|')[1]
-                                sessionStorage.setItem('watershed', watershed)
-                                var watershed_id = $('#watershed_select option:selected').val().split('|')[0]
-                                sessionStorage.setItem('watershed_id', watershed_id)
-                                $('#rch_tab').addClass('active');
-                                $('#sub_tab').removeClass('active');
-                                $('#lulc_tab').removeClass('active');
-                                if (sessionStorage.lulc_avail === 'Yes') {
-                                    // $('#clip_lulc').attr('disabled', false)
-                                    $('#clip_and_compute_lulc').attr('disabled', false)
+                            });
+                        }
+                    } catch (err) {
+                        alert("Please click on a watershed.")
 
-                                    // $('#lulc_compute').attr('disabled', true)
-                                }
-                                $('#soil_tab').removeClass('active');
-                                if (sessionStorage.soil_avail === 'Yes') {
-                                    // $('#clip_soil').attr('disabled', false)
-                                    // $('#soil_compute').attr('disabled', true)
-                                    $('#clip_and_compute_soil').attr('disabled', false)
-                                }
-                                $('#nasaaccess_tab').removeClass('active');
-                                $('#datacart_tab').removeClass('active');
-                                $('#rch_link').addClass('active');
-                                $('#sub_link').removeClass('active');
-                                $('#lulc_link').removeClass('active');
-                                $('#soil_link').removeClass('active');
-                                $('#nasaaccess_link').removeClass('active');
-                                $('#datacart_link').removeClass('active');
-                                $("#data-modal").modal('show');
-                                $("#data-modal-btn").removeClass('hidden');
-
-                                get_upstream(reach_store_id, basin_store_id, watershed, watershed_id, streamID, sessionStorage.userId);
-
-                            }
-                        });
                     }
                 }
             }
@@ -652,8 +656,7 @@ var closer = document.getElementById('popup-closer');
             },
             success: function (data) {
                 if(data.error=="error") {
-                    console.log("eeeeeeeeeee")
-                alert('alert')
+                    alert('Please turn off watershed layer to see the station details OR be sure you click on watersheds for the charts.')
                 }else {
                     var upstreams = data.upstreams
                     var outletID = sessionStorage.streamID
@@ -768,7 +771,7 @@ var closer = document.getElementById('popup-closer');
             },
             error:
             function (request, status, error) {
-        alert(request.responseText);
+               alert(request.responseText);
     }
         });
     }
