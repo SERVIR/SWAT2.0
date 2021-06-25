@@ -1862,8 +1862,8 @@ var img = document.createElement('img');
         });
         if ((watershed === undefined || start === 'Start Date' || end === 'End Date') && functions.includes("NEXgdpp") && functions.length> 1) {
             alert('Please be sure you have selected start and end dates');
-        }  else if ($('#nex_from').val()=="" || $('#nex_to').val()=="") {
-            alert('Please be sure you have selected all the options for NEX-GDPP');
+        }  else if (($('#nex_from').val()=="" || $('#nex_to').val()=="") &&$("#nex_gdpp").is(':checked'))  {
+            alert('Please be sure you have selected all the options');
         }else if (functions.length == 0) {
             alert('Please be sure you have selected start and end dates and at least 1 function')
         } else {
