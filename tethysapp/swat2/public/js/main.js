@@ -2103,6 +2103,7 @@ var img = document.createElement('img');
 
 
          $("#nex_save").click(function(){
+             nexgdpp=[];
                 var model = $('#nex_model :selected').text();
                  var type = $('#nex_type :selected').text();
                  var slice = $('#nex_slice :selected').text();
