@@ -1107,7 +1107,7 @@ var LIBRARY_OBJECT = (function() {
 
     };
 
-    add_lulc = function(){
+    add_lulc = function() {
 //      add the lulc layer for the selected watershed
         var store = $('#watershed_select option:selected').val().split('|')[1] + '-lulc'
         var store_id = gs_workspace + ':' + store
@@ -1117,7 +1117,7 @@ var LIBRARY_OBJECT = (function() {
 //      Set the wms source to the url, workspace, and store for the lulc layer of the selected watershed
         wms_source = new ol.source.ImageWMS({
             url: geoserver_url,
-            params: {'LAYERS':store_id,'STYLE':style},
+            params: {'LAYERS': store_id, 'STYLE': style},
             serverType: 'geoserver',
             crossOrigin: 'Anonymous'
         });
@@ -1127,17 +1127,21 @@ var LIBRARY_OBJECT = (function() {
         });
 
 //      add lulc layer to the map
-        map.addLayer(lulc_layer);
-var img = document.createElement('img');
-     img.src =  geoserver_url + '?request=GetLegendGraphic&version=1.1.0&format=image/png&width=10&height=10&layer=' + store_id+'&LEGEND_OPTIONS=bgColor:0xefefef;fontSize:12';
-       document.getElementById('legend_container').appendChild(img);
+        map.removeLayer(streams_layer);
 
+        map.addLayer(lulc_layer);
+        if((!$(".watershedToggle .toggle").hasClass( "off" ))) {
+            map.addLayer(streams_layer);
+        }
+        var img = document.createElement('img');
+        img.src = geoserver_url + '?request=GetLegendGraphic&version=1.1.0&format=image/png&width=10&height=10&layer=' + store_id + '&LEGEND_OPTIONS=bgColor:0xefefef;fontSize:12';
+        document.getElementById('legend_container').appendChild(img);
 
 
     }
 
 
-    add_soil = function(){
+    add_soil = function() {
 //      add the soil layer for the selected watershed
         var store = $('#watershed_select option:selected').val().split('|')[1] + '-soil'
         var store_id = gs_workspace + ':' + store
@@ -1146,7 +1150,7 @@ var img = document.createElement('img');
 //      Set the wms source to the url, workspace, and store for the soil layer of the selected watershed
         wms_source = new ol.source.ImageWMS({
             url: geoserver_url,
-            params: {'LAYERS':store_id,'STYLE':style},
+            params: {'LAYERS': store_id, 'STYLE': style},
             serverType: 'geoserver',
             crossOrigin: 'Anonymous'
         });
@@ -1156,11 +1160,16 @@ var img = document.createElement('img');
         });
 
 //      add soil layer to the map
-        map.addLayer(soil_layer);
+        map.removeLayer(streams_layer);
 
-     var img = document.createElement('img');
-     img.src =  geoserver_url + '?request=GetLegendGraphic&version=1.1.0&format=image/png&width=10&height=10&layer=' + store_id+'&LEGEND_OPTIONS=bgColor:0xefefef;fontSize:12;labelMargin:15;fontStyle:Italic;';
-       document.getElementById('legend_container').appendChild(img);
+        map.addLayer(soil_layer);
+        if((!$(".watershedToggle .toggle").hasClass( "off" ))) {
+            map.addLayer(streams_layer);
+
+        }
+        var img = document.createElement('img');
+        img.src = geoserver_url + '?request=GetLegendGraphic&version=1.1.0&format=image/png&width=10&height=10&layer=' + store_id + '&LEGEND_OPTIONS=bgColor:0xefefef;fontSize:12;labelMargin:15;fontStyle:Italic;';
+        document.getElementById('legend_container').appendChild(img);
 
     }
 
