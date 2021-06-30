@@ -122,11 +122,15 @@ def run_nasaaccess(request):
     userId = request.POST.get('userId')
     streamId = request.POST.get('streamId')
     start = request.POST.get('startDate')
-    d_start = str(datetime.strptime(start, '%B %d, %Y').strftime('%Y-%m-%d'))
-    end = request.POST.get(str('endDate'))
-    d_end = str(datetime.strptime(end, '%B %d, %Y').strftime('%Y-%m-%d'))
-    functions = request.POST.getlist('functions[]')
     nexgdpp=request.POST.getlist('nexgdpp[]')
+
+    if len(nexgdpp)>0 and start=="Start Date":
+        d_start=""
+    else:
+        d_start = str(datetime.strptime(start, '%B %d, %Y').strftime('%Y-%m-%d'))
+        end = request.POST.get(str('endDate'))
+        d_end = str(datetime.strptime(end, '%B %d, %Y').strftime('%Y-%m-%d'))
+    functions = request.POST.getlist('functions[]')
     watershed = request.POST.get('watershed')
     email = request.POST.get('email')
     nasaaccess_run(userId, streamId, email, functions, watershed, d_start, d_end,nexgdpp)
