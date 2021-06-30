@@ -126,6 +126,7 @@ def run_nasaaccess(request):
 
     if len(nexgdpp)>0 and start=="Start Date":
         d_start=""
+        d_end=""
     else:
         d_start = str(datetime.strptime(start, '%B %d, %Y').strftime('%Y-%m-%d'))
         end = request.POST.get(str('endDate'))
